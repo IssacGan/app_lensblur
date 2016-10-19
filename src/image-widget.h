@@ -26,7 +26,7 @@
 #include<iomanip>
 #include<stdio.h>
 
-#include "superpixels/superpixels.h"
+#include "superpixels/superpixels.cpp"
 #include "imagelabel.h"
 
 
@@ -88,12 +88,12 @@ private:
     
     void updateFocus()
     {
-        double newDepth = sp->getDepthInitialFromPixel(pixel_x, pixel_y) * 255;
+        /*double newDepth = sp->getDepthInitialFromPixel(pixel_x, pixel_y) * 255;
         
         if (newDepth < _minFocus)
             _minFocus = newDepth;
         if (newDepth > _maxFocus)
-            _maxFocus = newDepth;
+            _maxFocus = newDepth;*/
         
         cout << "FOCUS: " << _minFocus<< " "<< _maxFocus<<endl;
 
@@ -174,7 +174,7 @@ public:
 
         //int num = aux.toInt();
 
-        if (!sp->isNotNullImage() || !sp->isNotNullDepth() || !sp->isNotNullIndex())
+        if (!sp->isNotNullImage() )//|| !sp->isNotNullDepth() || !sp->isNotNullIndex())
         {
             setInfo("Error while load data");
             return false;
@@ -216,7 +216,7 @@ public:
     void loadDepth(QString filename)
     {
         setInfo("Loading depth...");
-        sp->loadDepth(filename.toStdString());
+        //sp->loadDepth(filename.toStdString());
         setImage(convertQtImage(sp->getImage()));
         zoomFit();
         setInfo("Depth file loaded");
@@ -225,7 +225,7 @@ public:
     void loadDepthBuildSystem()
     {
         setInfo("Loading depth, build system...");
-        sp->loadDepthBuildSystem("");
+        //sp->loadDepthBuildSystem("");
         //setImage(convertQtImage(sp->getImage()));
         //imageLabel->setPixmap(QPixmap::fromImage(convertQtImage(sp->getImage())));
         zoomFit();
@@ -263,24 +263,24 @@ public:
     float paintSuperpixel()
     {
         std::stringstream sstr;
-        sstr<<std::setw(7)<<"Superpixel id="<<  sp->getIdFromPixel(pixel_x,pixel_y) <<" DEPTH="<< sp->getDepthFromPixel(pixel_x,pixel_y);
+        sstr<<std::setw(7)<<"Superpixel id=";//<<  sp->getIdFromPixel(pixel_x,pixel_y) <<" DEPTH="<< sp->getDepthFromPixel(pixel_x,pixel_y);
         setInfo(QString(sstr.str().c_str()));
 
-        Mat im=sp->paintSuperpixel(pixel_x,pixel_y, new cv::Scalar(255,0,0));
+        /*Mat im=sp->paintSuperpixel(pixel_x,pixel_y, new cv::Scalar(255,0,0));
         
         if (last_pixel_x != -1 && last_pixel_y != -1)
         {
             im=sp->paintSuperpixel(last_pixel_x,last_pixel_y,new cv::Scalar(255,0,0));
             imshow("paintSelected",im);
             waitKey(1);
-        }
+        }*/
         
        
         
         
        // printf("%f %f\n",sp->getDepthFromPixel(pixel_x,pixel_y),sp->arraySP[sp->getIdFromPixel(pixel_x,pixel_y)].d_median);
         
-        return sp->getDepthFromPixel(pixel_x,pixel_y);
+        return 0;//sp->getDepthFromPixel(pixel_x,pixel_y);
     }
 
     void repaintSuperpixel()
@@ -289,15 +289,15 @@ public:
         {
             //not pixel selected
             float depth = (float) slider->value();
-            sp->copyDepth(pixel_x,pixel_y,depth/255);
+            //sp->copyDepth(pixel_x,pixel_y,depth/255);
 
         }else{
 
             if ( sp->getIdFromPixel(pixel_x, pixel_y) != sp->getIdFromPixel(last_pixel_x,last_pixel_y))
             {
-                sp->copySuperpixel(pixel_x,pixel_y,last_pixel_x,last_pixel_y);
+                //sp->copySuperpixel(pixel_x,pixel_y,last_pixel_x,last_pixel_y);
                 std::stringstream sstr;
-                sstr<<std::setw(7)<<"COPIAR id="<<  sp->getIdFromPixel(pixel_x,pixel_y) <<" DEPTH="<< sp->getDepthFromPixel(pixel_x,pixel_y);
+                sstr<<std::setw(7)<<"COPIAR id="<<  sp->getIdFromPixel(pixel_x,pixel_y);// <<" DEPTH="<< sp->getDepthFromPixel(pixel_x,pixel_y);
                 setInfo(QString(sstr.str().c_str()));
             }
         }
@@ -320,7 +320,7 @@ public slots:
         {
             if (sp != 0 )
             {
-                sp->addEquationsUnaries(sp->getIdFromPixel(x, y), (float) slider->value()/255.0);
+                //sp->addEquationsUnaries(sp->getIdFromPixel(x, y), (float) slider->value()/255.0);
                 //setImage(convertQtImage(sp->getImage()));
             }
         }
@@ -356,7 +356,7 @@ public slots:
         
             updatePixel();
             update();
-            sp->addEquationsUnaries(sp->getIdFromPixel(x, y), (float) slider->value()/255.0);
+            //sp->addEquationsUnaries(sp->getIdFromPixel(x, y), (float) slider->value()/255.0);
         }
         
        /* if (event->button() == Qt::LeftButton)
@@ -433,7 +433,7 @@ public slots:
         {
             
             //select other superpixel
-            sp->resetImage();
+           // sp->resetImage();
             paintSuperpixel();
             
             //compare
@@ -513,7 +513,7 @@ public slots:
     
     void changeWeightUnaries(int value)
     {
-        sp->w_unary= (float)value/100.0;
+        //sp->w_unary= (float)value/100.0;
         propagate();
     }
 
@@ -557,7 +557,7 @@ public slots:
     
     void propagate()
     {
-        sp->solve();
+       // sp->solve();
         Mat f=sp->getImage();
         //cv::resize(f, small, Size(640,480));
         setImage(convertQtImage(f));
@@ -579,7 +579,7 @@ public slots:
             //sp->addEquationsBinariesBoundaries();
         }
         else{
-            sp->addEquationsBinaries();
+            //sp->addEquationsBinaries();
         }
         propagate();
     }
@@ -611,8 +611,8 @@ public slots:
     void blurImage()
     {
         cout<< "Add blur image "<<endl;
-        Mat image;
-        cvtColor(sp->_lab,image,CV_Lab2BGR);
+       /* Mat image;
+        //cvtColor(sp->_lab,image,CV_Lab2BGR);
         Mat imageDepth = sp->_pixelDepth*255.0;
         int nbins=16;
         Mat f=  sp->blurImage(image, imageDepth, nbins,_minFocus,_maxFocus,_sizeFocus);//sp->blurImage(image, imageDepth, nbins);
@@ -626,7 +626,7 @@ public slots:
        // imshow("Gaussian Blur",f);
        // waitKey(0);
         
-        original->resetOriginal();
+        original->resetOriginal();*/
     }
 
 public:

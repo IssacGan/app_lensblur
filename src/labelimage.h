@@ -79,6 +79,7 @@ public:
     {
         setPixmap(QPixmap::fromImage(image));
     }
+    
     //activar solo desde fuera
     void setCanEdit(bool status)
     {
@@ -100,8 +101,6 @@ public:
         paint=false;
     }
 
-    
-
     //DRAW over image
     void setColorBlush(QColor color)
     {
@@ -109,7 +108,6 @@ public:
         colorBlush = color;
     }
 
-   
     //resetear la imagen original. Borrar las ediciones
     void resetImage()
     {

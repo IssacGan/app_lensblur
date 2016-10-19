@@ -9,8 +9,15 @@
 #include "gridbuttons.h"
 #include "labelimage.h"
 
-#include "Nsuperpixels/superpixels.h"
+#include "denseLabeling/denseLabeling.cpp"
+#include "depthoffielddefocus.h"
+
 #include <stdio.h>
+
+#define DEPTH_NEAR 224.0
+#define DEPTH_FAR_1 160.0
+#define DEPTH_FAR_2 96.0
+#define DEPTH_FAR_3 32.0
 
 class WidgetFocus : public QWidget
 {
@@ -20,14 +27,12 @@ private:
     
     //interfaz
     GridButtons *buttonOptions;
-    LabelImage *imageToEdit= new LabelImage();
+    LabelImage  *imageToEdit = new LabelImage();
     
     QLabel* info = new QLabel();
     
-    
     //Datos
-    SuperPixels *sp;
-    SuperPixels *spCTE;
+    DenseLabeling *denseDepth = NULL;
     
     //valor de profundidad
     float valueDepth = 255.0;
@@ -40,7 +45,7 @@ public:
     WidgetFocus()
     {
         QHBoxLayout *layoutH = new QHBoxLayout;
-        this->setWindowTitle("App focus/defocus with depth");
+        this->setWindowTitle("App Depth-of-Field simulation");
         this-> setMinimumSize(400,400);
         
         QVBoxLayout *buttons = new QVBoxLayout;
@@ -67,9 +72,7 @@ public:
         
         layoutH->addLayout(buttons);
         
-        
         QScrollArea *boxImage = new QScrollArea;
-        
         
         boxImage->setWidget(imageToEdit);
         
@@ -89,8 +92,7 @@ public:
         //conectar señales
         //click sobre opcion, cambiar color pincel
         QObject::connect(buttonOptions,  &GridButtons::optionSelected,
-                         this,&WidgetFocus::changeColorPaint);//*/
-        
+                         this,&WidgetFocus::changeColorPaint);
         
         QObject::connect(imageToEdit, &LabelImage::mousePixelDown,
                          this, &WidgetFocus::clickMousePixel);
@@ -104,10 +106,6 @@ public:
         QObject::connect(sliderFocus, SIGNAL(valueChanged(int)), this, SLOT(updateSizeFocus(int)));
         
         resize(sizeHint());
-        /* QObject::connect(imageToEdit,
-         &ImageLabel::removeImageStrokes,
-         this,&WidgetFocus::resetOptions);//*/
-        
     }
     
     ~WidgetFocus() {};
@@ -120,16 +118,16 @@ public:
     
     void resizeEvent(QResizeEvent* event)
     {
-        
         imageToEdit->resizeEvent(event);
-        //fprintf(stderr,"RESIZE widget focus %d %d \n",this->size().width(),this->size().height());
+        
+        if (denseDepth != NULL )
+            blurImage();
     }
     
     
     public slots:
     void changeColorPaint(int id)
     {
-        
         switch (id)
         {
             case ID_NEAR:
@@ -181,99 +179,48 @@ public:
     {
         _sizeFocus = size;//double (size)*3.0;
         blurImage();
-        
-        //cout << "Focus: "<< size << "   size: "<< _sizeFocus << endl;
     }
     
-    //////////////// SUPERPIXELS
-    
+    //////////////// SUPERPIXELS + BINARY EQUATIONS
     bool loadData(QString filename)
     {
-        
+        //mostrar imagen en la interfaz
+        bool opened = imageToEdit->initImageLabel(filename,640,320);
         imageToEdit->setCanEdit(false);
-        //cargar imagen original
-        loadImage(filename);
         
-        QString superpixels = filename.left(filename.lastIndexOf("/"));
-        QString depth = superpixels.left(superpixels.lastIndexOf("/")) + "/depth";
+        denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
         
-        QString name = filename.right(filename.length() - filename.lastIndexOf("/") - 1);
-        QString aux = name.left(name.lastIndexOf("."));
-        
-        //cargar los superpixels
-        superpixels = superpixels + "/superpixels/" + aux + "_SLIC_30.sp";
-        loadSuperPixels(superpixels);
-        //  imshow("Superpixels",spCTE->getImage());
-        
-        //cargar depth
-        loadDepth();
-        
-        
-        if (!sp->isNotNullImage() || !sp->isNotNullDepth() || !sp->isNotNullIndex())
+        if (!denseDepth->isNotNullImage() || !opened )
         {
-            setInfo("Error while load data");
+            setInfo("Problem to open the image!");
             return false;
         }
         else
         {
-            setInfo("Data loaded successfully");
-            imageToEdit->setCanEdit(true);
-            return true;
-        }
-        
-        //
-        
-        
-        
-    }
-    
-    void loadImage(QString filename)
-    {
-        bool opened=false;
-        
-        if (!filename.isEmpty())
-        {
-            //mostrar imagen en la interfaz
-            opened = imageToEdit->initImageLabel(filename,640,320);
-            
-            //inicializar superpixels
-            sp = new SuperPixels(filename.toStdString());
-            
-            //
-            spCTE = new SuperPixels(filename.toStdString());
-        }
-        
-        //comprobar si se ha abierto la imagen y los superpixels
-        if (!sp->isNotNullImage() || !opened )
-            setInfo("Problem to open the image");
-        else
             setInfo("Image opened correctly.");
+            imageToEdit->setCanEdit(true);
+        }
+        //binary equations
+        denseDepth->addEquations_BinariesBoundariesPerPixelMean();
+        setInfo("Created binary equations.");
         
+        return true;
     }
-    
-    void loadSuperPixels(QString filename)
+
+    //////////////// INPUT UNARY EQUATIONS
+    void loadDepth(QString filename)
     {
-        sp->loadSuperPixels(filename.toStdString());
-        setInfo("Superpixels file loaded");
+        denseDepth->addEquations_Unaries(filename.toStdString());
+        setInfo("Load input depth (unary equations)");
         
-        spCTE->loadSuperPixels(filename.toStdString());
-    }
-    
-    void loadDepth()
-    {
-        setInfo("Loading depth, build system...");
-        sp->loadDepthBuildSystemCoef("");
-        sp->addEquationsBinariesBoundariesCoef();
-        setInfo("Depth file loaded");
-        
-        spCTE->loadDepthBuildSystem("");
-        
+        blurImage();
+        setInfo("Solved system.");
     }
     
     void saveData()
     {
-        //guardar depth y
-        //guardar la image de defocus
+        blurImage(true);
+        setInfo("Save all");
     }
     
     ////////////////
@@ -281,34 +228,17 @@ public:
     //////// MOUSE
     void updatePixel(int x, int y)
     {
-        /* std::stringstream sstr;
-         sstr<<std::setw(7)<<"x: "<<  x <<" y: "<< y;
-         setInfo(QString(sstr.str().c_str()));*/
-        
         if (buttonOptions->focusSelected())
             imageToEdit->disablePaint();
         else if (imageToEdit->getCanEdit())
         {
-            //sp->addEquationsUnaries(sp->getIdFromPixel(x,y), valueDepth/255.0);
-            clock_t start = clock();
-            
-            
-            sp->addUnariesCoef( x,  y,  valueDepth/255.0);
-            
-            printf("**** TIEMPO: Ecuacion unaria: %f seconds\n ",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC) );
-            
-            //CTE
-            spCTE->addEquationsUnaries(x,y, valueDepth/255.0 );
-            
+            setInfo("Add unary equation");
+            denseDepth->addEquation_Unary(x,y,valueDepth/255.0);
         }
-        
-        //fprintf(stderr,"PIXEL %d %d \n",x,y);
-        
     }
     
     void clickMousePixel(int x, int y,QMouseEvent * event)
     {
-        // fprintf(stderr,"PIXEL %d %d \n",x,y);
         if (event->button() == Qt::LeftButton)
         {
             if (imageToEdit->getCanEdit())
@@ -321,21 +251,9 @@ public:
                 }
                 else
                 {
-                    
-                    clock_t start = clock();
-                    
-                    sp->addUnariesCoef(x,y, valueDepth/255.0);
-                    
-                    printf("**** TIEMPO: Ecuacion unaria: %f seconds\n ",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC) );
-                    
-                    //cTE
-                    spCTE->addEquationsUnaries(sp->getIdFromPixel(x,y), valueDepth/255.0);
-                    
+                    setInfo("Add unary equation");
+                    denseDepth->addEquation_Unary(x,y,valueDepth/255.0);
                 }
-                
-                
-                //sp->addEquationsUnaries(sp->getIdFromPixel(x,y), valueDepth/255.0);
-                // sp->addEquationsUnaries(x,y, valueDepth/255.0);
             }
         }
     }
@@ -352,78 +270,56 @@ public:
     
     void updateFocus(int x, int y)
     {
-        double newDepth = sp->getDepthInitialFromPixel(x,y) * 255.0;
+        double newDepth = denseDepth->getLabel(x,y) * 255.0;
         
-        //   if (newDepth < _minFocus)
-        _minFocus = newDepth;
-        /* if (newDepth > _maxFocus)
-         _maxFocus = newDepth;*/
-        //   _maxFocus=_minFocus+50;
+        //if (newDepth < _minFocus)
+            _minFocus = newDepth;
+       // if (newDepth > _maxFocus)
+         //   _maxFocus = newDepth;
         
-        // fprintf(stderr,"_min: %f max: %f new: %f",_minFocus,_maxFocus,newDepth);
+       
+         fprintf(stderr,"_min: %f max: %f new: %f",_minFocus,_maxFocus,newDepth);
     }
     
-    void blurImage()
+    void blurImage(bool save=false)
     {
-        clock_t start = clock();
-        
-        sp->solveCoef();
-        
-        printf("**** TIEMPO: Solve: %f seconds\n ",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC) );
-        
-        
-        Mat f=sp->getImage();
-        // imwrite("depth.png", f);
-        
-        cv::resize(f, f, Size(imageToEdit->size().width(),imageToEdit->size().height()));
-        imshow("depth",f);
-        
-        
-        start = clock();
+        //show denseDepth estimation
+        Mat sol = denseDepth->solve();
+        Mat sol_gray = sol * 255.0;
         
         //BLUR
-       /* Mat image;
-        cvtColor(sp->_lab,image,CV_Lab2BGR);
-        Mat imageDepth = sp->_pixelDepth*255.0;
-        
-        Mat final;
-        
-        
         int   nbins          = 8;
         float aperture       = _sizeFocus;
         float focal_distance = _minFocus;
         float focal_length   = _minFocus+20;
         bool  linear         = true;
-        Mat b;
-        //  if (_minFocus == 255.0 && _maxFocus == 0.0)
-        //      b=  sp->blurImage(image, imageDepth, nbins,_minFocus,_minFocus+25,_sizeFocus);
-        // else
-        // double max = _minFocus+20 > 255 ? 255 : _minFocus+20;
-        // b=  sp->blurImage(image, imageDepth, nbins,_minFocus,max,_sizeFocus);
-        b=sp->blurImageDepth(image, imageDepth, nbins,focal_distance,focal_length,aperture, linear);
-        // Mat b=  sp->blurImage(image, imageDepth, nbins,255.0,255.0,_sizeFocus);
-        //sp->blurImage(image, imageDepth, nbins);
-        //cvtColor(b,b,CV_RGB2BGR);
-        cv::resize(b, b, Size(imageToEdit->size().width(),imageToEdit->size().height()));
-        //imshow("Blur",b);
-        //imwrite("blur.png", b);
+        Mat final = blur_image_depth(denseDepth->getImage(), sol_gray, nbins,focal_distance,focal_length,aperture, linear);
 
-        printf("**** TIEMPO: Blur: %f seconds\n ",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC) );
+        cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         
-        cvtColor(b,b,CV_BGR2RGB);
+        imshow("Blur",final);
         
-        // if (buttonOptions->focusSelected())
-        imageToEdit->setImage(convertQtImage(b));*/
+        //
+        sol_gray.convertTo(sol_gray,CV_8UC1);
+        cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
+        imshow("solution",sol_gray);
         
+        if (save)
+        {
+            Mat user = denseDepth->getImageLabelsInput() *255.0;
+            user.convertTo(user, CV_8UC1);
+            
+            setInfo("Save images, dir actual");
+            imwrite("user_input.png",user);
+            imwrite("blur.png",final);
+            imwrite("depth.png",sol_gray);
+        }
         
-        //CTE
-        spCTE->solve();
+        cvtColor(final,final,CV_BGR2RGB);
         
-        Mat fcte=spCTE->getImage();
-        // imwrite("depth.png", f);
-        
-        cv::resize(fcte, fcte, Size(imageToEdit->size().width(),imageToEdit->size().height()));
-        imshow("depth CTE",fcte);
+        //if (buttonOptions->focusSelected())
+            imageToEdit->setImage(convertQtImage(final));
+
     }
     
     QImage convertQtImage(Mat _image)

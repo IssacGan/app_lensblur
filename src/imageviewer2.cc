@@ -187,6 +187,8 @@ void ImageViewer::loadBuildSystem()
 
 void ImageViewer::save()
 {
+    QMessageBox::information(this, tr("Image Viewer"),tr("SAVEEEEEr"));
+    
     if (backThread->isRunning())
         QMessageBox::information(this, tr("Image Viewer"),
                                  tr("Busy"));
@@ -205,25 +207,25 @@ void ImageViewer::save()
      openAct->setShortcut(tr("Ctrl+O"));
      connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
      
-     imageAct = new QAction(tr("&Open image..."), this);
+    /* imageAct = new QAction(tr("&Open image..."), this);
      imageAct->setShortcut(tr("Ctrl+I"));
-     connect(imageAct, SIGNAL(triggered()), this, SLOT(openImage()));
+     connect(imageAct, SIGNAL(triggered()), this, SLOT(openImage()));*/
      
-     superpixelsAct = new QAction(tr("&Load superpixels..."), this);
+     /*superpixelsAct = new QAction(tr("&Load superpixels..."), this);
      superpixelsAct->setShortcut(tr("Ctrl+S"));
-     connect(superpixelsAct, SIGNAL(triggered()), this, SLOT(loadSuperpixels()));
+     connect(superpixelsAct, SIGNAL(triggered()), this, SLOT(loadSuperpixels()));*/
 
-     equationAct = new QAction(tr("&Build system..."), this);
+     /*equationAct = new QAction(tr("&Build system..."), this);
      equationAct->setShortcut(tr("Ctrl+B"));
-     connect(equationAct, SIGNAL(triggered()), this, SLOT(loadBuildSystem()));
+     connect(equationAct, SIGNAL(triggered()), this, SLOT(loadBuildSystem()));*/
      
      depthAct = new QAction(tr("&Load depth..."), this);
      depthAct->setShortcut(tr("Ctrl+D"));
      connect(depthAct, SIGNAL(triggered()), this, SLOT(loadDepth()));
      
-     exitAct = new QAction(tr("&Save"), this);
-     exitAct->setShortcut(tr("Ctrl+G"));
-     connect(exitAct, SIGNAL(triggered()), this, SLOT(save()));
+     saveAct = new QAction(tr("&Save"), this);
+     saveAct->setShortcut(tr("Ctrl+S"));
+     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
      
 
      exitAct = new QAction(tr("&Exit"), this);
@@ -237,15 +239,17 @@ void ImageViewer::save()
      fileMenu = new QMenu(tr("&File"), this);
      fileMenu->addAction(openAct);
      
-     fileMenu->addSeparator();
-     fileMenu->addAction(imageAct);
+    // fileMenu->addSeparator();
+    // fileMenu->addAction(imageAct);
      
-     fileMenu->addSeparator();
-     fileMenu->addAction(superpixelsAct);
-     fileMenu->addSeparator();
-     fileMenu->addAction(equationAct);
+    // fileMenu->addSeparator();
+    // fileMenu->addAction(superpixelsAct);
+    // fileMenu->addSeparator();
+    // fileMenu->addAction(equationAct);
      fileMenu->addSeparator();
      fileMenu->addAction(depthAct);
+     fileMenu->addSeparator();
+     fileMenu->addAction(saveAct);
 
      fileMenu->addSeparator();
      fileMenu->addAction(exitAct);

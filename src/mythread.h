@@ -7,8 +7,6 @@
 
 #include "widgetFocus.h"
 
-#include "image-widget.h"
-
 class MyThread : public QThread
 {
     Q_OBJECT

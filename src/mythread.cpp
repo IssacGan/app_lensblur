@@ -22,18 +22,18 @@ void MyThread::run()
         case 0:
             this->gui->loadData(path);
             break;
-        case 1:
+       /* case 1:
             this->gui->loadImage(path);
-            break;
-        case 2:
+            break;*/
+       /* case 2:
             this->gui->loadSuperPixels(path);
-            break;
+            break;*/
         case 3:
-         //   this->gui->loadDepth(path);
+            this->gui->loadDepth(path);
             break;
-        case 4:
+        /*case 4:
             this->gui->loadDepth();
-            break;
+            break;*/
         case 5: //save
             this->gui->saveData();
 
