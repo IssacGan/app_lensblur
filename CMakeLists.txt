@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-  project(app_defocus)
+  project(app_dof)
 
   # Tell CMake to run moc when necessary:
   set(CMAKE_AUTOMOC ON)
@@ -14,37 +14,24 @@ cmake_minimum_required(VERSION 2.8.9)
   # PATH Qt: http://www.qt.io/download/
   ################################
 
-  set( Qt5  /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake) #CUSTOMIZE: installation Qt path
+  set(Qt5_DIR /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake/Qt5) #CUSTOMIZE: installation Qt path
 
-  IF(NOT IS_DIRECTORY Qt5)
-     set( Qt5  /Users/acambra/TESIS/code/libs/Qt/5.3/clang_64/lib/cmake)
-   ENDIF(NOT IS_DIRECTORY VLFEAT_DIR)
 
   ################################
   # PATH OpenCV
   ################################
   set(OpenCV_DIR /usr/local/share/OpenCV) #CUSTOMIZE: installation OpenCV path
 
-  ################################
-  # PATH vlFeat: http://www.vlfeat.org/download.html
-  ################################
-
-  set( VLFEAT_DIR  /Users/acambra/TESIS/code/libs/vlfeat-0.9.20) #macbook
-
-  IF(NOT IS_DIRECTORY VLFEAT_DIR)
-     set( VLFEAT_DIR  /Users/acambra/TESIS/vlfeat-0.9.18) #iMac
-  ENDIF(NOT IS_DIRECTORY VLFEAT_DIR)
-
+ 
   ##################################################################################
   #     Qt
   ##################################################################################
 
   # Widgets finds its own dependencies (QtGui and QtCore).
 
-  set( Qt5_DIR ${Qt5}/Qt5)
-  set( Qt5Core_DIR ${Qt5}/Qt5Core)
-  set( Qt5Widgets_DIR ${Qt5}/Qt5Widgets)
-  set( Qt5Gui_DIR ${Qt5}/Qt5Gui)
+  set( Qt5Core_DIR ${Qt5_DIR}/../Qt5Core)
+  set( Qt5Widgets_DIR  ${Qt5_DIR}/../Qt5Widgets)
+  set( Qt5Gui_DIR  ${Qt5_DIR}/../Qt5Gui)
 	
   # Find packages Qt
   find_package(Qt5)
@@ -68,19 +55,11 @@ cmake_minimum_required(VERSION 2.8.9)
   ##################################################################################
   #     OpenCV
   ##################################################################################
-
-  #set(OpenCV_DIR /usr/local/share/OpenCV) #CUSTOMIZE: installation OpenCV path
   
   find_package(OpenCV REQUIRED)
   include_directories(${OpenCV_INCLUDES})
   
-  ##################################################################################
-  #     VlFeat: slic superpixels
-  ##################################################################################
-
-
-  set (VLFEAT_LIB ${VLFEAT_DIR}/bin/maci64)
-
+  
   ##################################################################################
   #     Compiler FLAGS
   ##################################################################################
@@ -91,26 +70,27 @@ cmake_minimum_required(VERSION 2.8.9)
   #     paths: include and lib
   ##################################################################################
 
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
-  include_directories(${VLFEAT_DIR})
+  include_directories(libs)
+  include_directories(libs/lib_slic)
+  include_directories(superpixels)  
 
   ##################################################################################
   #     src
   ##################################################################################
+  add_library(slic libs/lib_slic/SLIC.cpp)
+  add_library(blur libs/depthoffielddefocus.cc)
 
-  add_executable(${PROJECT_NAME} src/labelimage.h src/widgetFocus.h src/gridButtons.h src/imageviewer2.h src/imageviewer2.cc 
-			src/superpixels/superpixel.h  src/superpixels/superpixel.cpp
-            src/Nsuperpixels/superpixels.h
-			src/Nsuperpixels/superpixels.cpp
-			include/depthoffielddefocus.h
-			src/mythread.cpp src/mythread.h src/main.cc
-			include/least-squares-linear-system2.h )
+  add_executable(${PROJECT_NAME} 
+		src/labelimage.h src/widgetFocus.h src/gridButtons.h src/imageviewer2.h src/imageviewer2.cc
+		src/mythread.cpp src/mythread.h src/main.cc
+		superpixels/superpixel.cpp
+		superpixels/superpixels.cpp
+		superpixels/labelSet.cpp
+		denseLabeling/denseLabeling.cpp
+		libs/least-squares-linear-system2.h)
 
 
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${VLFEAT_LIB}/libvl.dylib)
-
-  file(COPY ${VLFEAT_LIB}/libvl.dylib DESTINATION ${CMAKE_BINARY_DIR}/Debug)
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic blur)
 
   # The Qt5Widgets_LIBRARIES variable also includes QtGui and QtCore
   qt5_use_modules(${PROJECT_NAME} Core Widgets)
