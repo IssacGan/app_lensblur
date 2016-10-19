@@ -4,6 +4,7 @@
 #include "Eigen/Dense"
 #include <map>
 #include <vector>
+#include <iostream>
 
 namespace Optimization {
 
@@ -27,16 +28,12 @@ public:
 
 template<typename real, int size = Eigen::Dynamic>
 class LeastSquaresLinearSystem {
-    //CHANGE
-public: Eigen::Matrix<real,size,size> A;
+	Eigen::Matrix<real,size,size> A;
 	Eigen::Matrix<real,size,1> B;
 public:
 	LeastSquaresLinearSystem() { A.fill(real(0)); B.fill(real(0)); }
 	LeastSquaresLinearSystem(unsigned int s) : A(s,s), B(s) 
 		{ A.fill(real(0)); B.fill(real(0)); }
-    
-    // Definición del constructor copia:
-    LeastSquaresLinearSystem(const LeastSquaresLinearSystem &s){ A = s.A;B = s.B ;}
 	
 	template<typename r2>
 	void add_equation(const SparseEquation<r2>& equation)
@@ -84,6 +81,14 @@ public:
 
 	Eigen::Matrix<real,size,1> solve() const
 	{	return A.ldlt().solve(B);       }
+    
+    /*void getEigenValuesA()
+    {
+        cout << "\EIGEN VALUES Matrix A\n";
+        cout << A.eigenvalues();
+        
+    }*/
+    
 };
 
 

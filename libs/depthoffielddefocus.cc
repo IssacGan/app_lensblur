@@ -1,3 +1,6 @@
+#ifndef BLURIMAGE
+#define BLURIMAGE
+
 //
 //  main.cpp
 //  test_superpixels
@@ -6,11 +9,11 @@
 //  Copyright (c) 2014 Ana Cambra. All rights reserved.
 //
 
-//#include <iostream>
+#include <stdio.h>
 //Opencv
-/*#include "opencv2/core/core.hpp"
+#include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"*/
+#include "opencv2/highgui/highgui.hpp"
 //#include <chrono>
 //#include <strings.h>
 
@@ -282,3 +285,4 @@ void  adolfoBlur() {
     
     imshow("final",f1);
 }
+#endif
