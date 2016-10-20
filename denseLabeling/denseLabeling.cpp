@@ -149,17 +149,17 @@ public:
         
         int id=getIdFromPixel(x, y);
         
+         _labelsInput.at<float>(y,x) = li;
+        
         if (saveInput)
         {
-            
-            _labelsInput.at<float>(y,x) = li;
-            
             Mat image=_labelsInput*255.0;
             image.convertTo(image, CV_8UC1);
         
             cvtColor(image, image,CV_GRAY2RGB);
-            imshow("unaries",image);
-            //imwrite("userInput.png", image);
+            //imshow("unaries",image);
+            imwrite("userInput.png", image);
+            image.release();
         }
         
         if(li  > 0.0)

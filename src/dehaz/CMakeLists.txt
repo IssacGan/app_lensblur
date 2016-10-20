@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-  project(app_dof)
+  project(app_dehaz)
 
   # Tell CMake to run moc when necessary:
   set(CMAKE_AUTOMOC ON)
@@ -70,27 +70,34 @@ cmake_minimum_required(VERSION 2.8.9)
   #     paths: include and lib
   ##################################################################################
 
-  include_directories(libs)
-  include_directories(libs/lib_slic)
-  include_directories(superpixels)  
+  include_directories(../../libs)
+  include_directories(../../libs/lib_slic)
+  include_directories(../../superpixels)
+  include_directories(../../denseLabeling) 
 
   ##################################################################################
   #     src
   ##################################################################################
-  add_library(slic libs/lib_slic/SLIC.cpp)
-  add_library(blur libs/depthoffielddefocus.cc)
+  add_library(slic ../../libs/lib_slic/SLIC.cpp)
+  add_library(dehazing ../../libs/dehazing/dehazing.cc)
 
   add_executable(${PROJECT_NAME} 
-		src/dof/labelimage.h src/dof/widgetFocus.h src/dof/gridButtons.h src/dof/imageviewer2.h src/dof/imageviewer2.cc
-		src/dof/mythread.cpp src/dof/mythread.h src/dof/main.cc
-		superpixels/superpixel.cpp
-		superpixels/superpixels.cpp
-		superpixels/labelSet.cpp
-		denseLabeling/denseLabeling.cpp
-		libs/least-squares-linear-system2.h)
+		labelimage.h 
+		widgetFocus.h 
+		gridButtons.h 
+		imageviewer2.h 
+		imageviewer2.cc
+		mythread.cpp 
+		mythread.h
+		main.cc
+		../../superpixels/superpixel.cpp
+		../../superpixels/superpixels.cpp
+		../../superpixels/labelSet.cpp
+		../../denseLabeling/denseLabeling.cpp
+		../../libs/least-squares-linear-system2.h)
 
 
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic blur)
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic dehazing)
 
   # The Qt5Widgets_LIBRARIES variable also includes QtGui and QtCore
   qt5_use_modules(${PROJECT_NAME} Core Widgets)

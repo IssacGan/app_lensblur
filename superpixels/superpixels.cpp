@@ -205,7 +205,7 @@ public:
             _ids= Mat::zeros(_image.rows,_image.cols,CV_32FC1);
             _sobel= Mat::zeros(_image.rows,_image.cols,CV_8UC1);
             _labels= Mat::ones(_ids.rows,_ids.cols,CV_32FC1)*-1;
-            _labelsInput = Mat::ones(_ids.rows,_ids.cols,CV_32FC1)*-1;
+            _labelsInput = Mat::zeros(_ids.rows,_ids.cols,CV_32FC1);
         }
         catch(int e)
         {

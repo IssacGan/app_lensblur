@@ -9,8 +9,8 @@
 #include "gridbuttons.h"
 #include "labelimage.h"
 
-#include "denseLabeling/denseLabeling.cpp"
-#include "depthoffielddefocus.h"
+#include "denseLabeling.cpp"
+#include "dehazing/dehazing.h"
 
 #include <stdio.h>
 
@@ -37,7 +37,7 @@ private:
     //valor de profundidad
     float valueDepth = 255.0;
     double _minFocus = 220, _maxFocus=0.0;
-    double _sizeFocus = 7.0;
+    double _sizeFocus = 50.0;
     
 public:
     
@@ -62,7 +62,7 @@ public:
         sliderFocus->setTickPosition(QSlider::TicksAbove);
         // sliderFocus->setTickInterval(100);
         sliderFocus->setRange(1,100);
-        sliderFocus->setValue(25);
+        sliderFocus->setValue(50);
         sliderFocus->setEnabled(true);
         sliderFocus->setFixedSize(180,20);
         
@@ -201,7 +201,8 @@ public:
             imageToEdit->setCanEdit(true);
         }
         //binary equations
-        denseDepth->addEquations_BinariesBoundariesPerPixelMean();
+       // denseDepth->addEquations_BinariesBoundariesPerPixelMean();
+        denseDepth->addEquations_BinariesBoundariesPerPixel();
         setInfo("Binary equations created.");
         
         return true;
@@ -283,17 +284,32 @@ public:
     {
         //show denseDepth estimation
         Mat sol = denseDepth->solve();
-        Mat sol_gray = sol * 255.0;
+        
+        
+        double min, max;
+        minMaxLoc(sol, &min, &max);
+        
+        
+        
+        //DEHAZ
+        double min_t = ((_sizeFocus/100.0)*min) + ((1.0 - (_sizeFocus/100.0))*max);//0.05;
+        double max_t = max;//0.95;
+        
+        printf("Mat sol: min %f max %f slider %f MIN_T %f \n",min,max,_sizeFocus,min_t);
+        
+        Mat final = dehaze(denseDepth->getImage(), sol, min_t, max_t);
+        
         
         //BLUR
-        int   nbins          = 8;
+        /*int   nbins          = 8;
         float aperture       = _sizeFocus;
         float focal_distance = _minFocus;
         float focal_length   = _minFocus+20;
         bool  linear         = true;
         Mat final = blur_image_depth(denseDepth->getImage(), sol_gray, nbins,focal_distance,focal_length,aperture, linear);
-        
+        */
         //
+        Mat sol_gray = sol * 255.0;
         sol_gray.convertTo(sol_gray,CV_8UC1);
         
         if (save)
@@ -304,7 +320,7 @@ public:
             string name = dir + "/user_input.png";
             setInfo("Save images");
             imwrite(name,user);
-            name = dir + "/blur.png";
+            name = dir + "/dehaz.png";
             imwrite(name,final);
             name = dir + "/depth.png";
             imwrite(name,sol_gray);
@@ -312,10 +328,13 @@ public:
         cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         imshow("solution",sol_gray);
         cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
+        
+        imshow("dehaz",final);
+        
         cvtColor(final,final,CV_BGR2RGB);
         
         //if (buttonOptions->focusSelected())
-            imageToEdit->setImage(convertQtImage(final));
+           // imageToEdit->setImage(convertQtImage(final));//*/
     }
     
     QImage convertQtImage(Mat _image)
