@@ -19,6 +19,11 @@
 #define DEPTH_FAR_2 96.0
 #define DEPTH_FAR_3 32.0
 
+#define NO_FOG 255.0
+#define MIN_FOG 160.0
+#define MEDIUM_FOG 96.0
+#define MAX_FOG 30.0
+
 class WidgetFocus : public QWidget
 {
     Q_OBJECT
@@ -130,37 +135,37 @@ public:
     {
         switch (id)
         {
-            case ID_NEAR:
+            case ID_1:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 0,255));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=DEPTH_NEAR;//224;//250.0;
+                valueDepth=NO_FOG;//224;//250.0;
                 // imageToEdit->setCanEdit(true);
                 break;
-            case ID_FAR_1:
+            case ID_2:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 255,0));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=DEPTH_FAR_1;//160;//150.0;
+                valueDepth=MIN_FOG;//160;//150.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
-            case ID_FAR_2:
+            case ID_3:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 150,0));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=DEPTH_FAR_2;//96;//50.0;
+                valueDepth=MEDIUM_FOG;//96;//50.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
-            case ID_FAR_3:
+            case ID_4:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 75,0));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=DEPTH_FAR_3;//32;//10.0;
+                valueDepth=MAX_FOG;//32;//10.0;
                 //   imageToEdit->setCanEdit(true);
                 break;
                 
-            case ID_FOCUS:
+            /*case ID_FOCUS:
                 imageToEdit->setColorBlush(QColor::fromRgb(255, 0,0));
                 //   imageToEdit->setCanEdit(false);
                 // this->setCursor(Qt::PointingHandCursor);
                 blurImage();
-                break;
+                break;*/
                 
         }
         // fprintf(stderr,"cambiar color %d \n",id);
@@ -201,8 +206,8 @@ public:
             imageToEdit->setCanEdit(true);
         }
         //binary equations
-       // denseDepth->addEquations_BinariesBoundariesPerPixelMean();
-        denseDepth->addEquations_BinariesBoundariesPerPixel();
+        denseDepth->addEquations_BinariesBoundariesPerPixelMean();
+       // denseDepth->addEquations_BinariesBoundariesPerPixel();
         setInfo("Binary equations created.");
         
         return true;
@@ -315,8 +320,7 @@ public:
         if (save)
         {
             Mat user = denseDepth->getImageLabelsInput() * 255.0;
-            user.convertTo(user, CV_8UC1);
-            
+            user.convertTo(user, CV_8UC1);            
             string name = dir + "/user_input.png";
             setInfo("Save images");
             imwrite(name,user);

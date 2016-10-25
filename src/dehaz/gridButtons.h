@@ -8,11 +8,11 @@
 
 #include <QGridLayout>
 
-#define ID_NEAR 1
+#define ID_1 1
 
-#define ID_FAR_1 2
-#define ID_FAR_2 3
-#define ID_FAR_3 4
+#define ID_2 2
+#define ID_3 3
+#define ID_4 4
 
 #define ID_FOCUS 5
 
@@ -47,18 +47,18 @@ public:
         QString infoLandscape= "Draw green strokes with the mouse.\n Select the furthest objects.";
         QString infoFocus= "Draw red strokes.\n Select objects you want to show focused.";
 
-        portrait = new QRadioButton("Near" );
+        portrait = new QRadioButton("NO FOG" );
         portrait->setToolTip(infoPortrait);
         
-        landscape1 = new QRadioButton( "Far min" );
+        landscape1 = new QRadioButton( "MIN FOG" );
         landscape1->setToolTip(infoLandscape);
-        landscape2 = new QRadioButton( "Far " );
+        landscape2 = new QRadioButton( "MEDIUM FOG " );
         landscape2->setToolTip(infoLandscape);
-        landscape3 = new QRadioButton( "Far max" );
+        landscape3 = new QRadioButton( "MAX FOG" );
         landscape3->setToolTip(infoLandscape);
         
-        focus = new QRadioButton( "Focus");
-        focus->setToolTip(infoFocus);
+        /*focus = new QRadioButton( "Focus");
+        focus->setToolTip(infoFocus);*/
 
         options =  new QButtonGroup( parent );
 
@@ -68,7 +68,7 @@ public:
         options->addButton( landscape2 );
         options->addButton( landscape3 );
         
-        options->addButton( focus );
+       // options->addButton( focus );
 
         //crear iconos
       /*  QImage *icon1 = new QImage("/Users/acambra/Desktop/camera63.png");
@@ -111,7 +111,7 @@ public:
         grid->addWidget( landscape1, 1, 1 );
         grid->addWidget( landscape2, 2, 1 );
         grid->addWidget( landscape3, 3, 1 );
-        grid->addWidget( focus, 4, 1 );
+        //grid->addWidget( focus, 4, 1 );
 
       /*  grid->addWidget(label1, 0, 0 );
         grid->addWidget(label2_1, 1, 0 );
@@ -149,33 +149,33 @@ public slots:
            if (id == options->id(this->portrait))
            {
                fprintf(stderr," button CLICKED Portrait\n");
-               _id = ID_NEAR;
+               _id = ID_1;
                emit optionSelected(_id);
            }
            else if (id == options->id(this->landscape1))
            {
                fprintf(stderr," button CLICKED landscape\n");
-               _id = ID_FAR_1;
+               _id = ID_2;
                emit optionSelected(_id);
            }
            else if (id == options->id(this->landscape2))
            {
                fprintf(stderr," button CLICKED landscape\n");
-               _id = ID_FAR_2;
+               _id = ID_3;
                emit optionSelected(_id);
            }
            else if (id == options->id(this->landscape3))
            {
                fprintf(stderr," button CLICKED landscape\n");
-               _id = ID_FAR_3;
+               _id = ID_4;
                emit optionSelected(_id);
            }
-           else if (id == options->id(this->focus))
+          /* else if (id == options->id(this->focus))
            {
                fprintf(stderr," button CLICKED Focus\n");
                _id = ID_FOCUS;
                emit optionSelected(_id);
-           }
+           }*/
     }
 };
 
