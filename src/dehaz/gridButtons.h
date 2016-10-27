@@ -28,7 +28,7 @@ private:
     QRadioButton *landscape1; // = new QRadioButton( "Lejos" );
     QRadioButton *landscape2; // = new QRadioButton( "Lejos" );
     QRadioButton *landscape3; // = new QRadioButton( "Lejos" );
-    QRadioButton *focus;// = new QRadioButton( "Focus");
+    //QRadioButton *focus;// = new QRadioButton( "Focus");
 
     int _id = -1;
 
@@ -135,6 +135,11 @@ public slots:
             return true;
         
         return false;
+    }
+    
+    int idSelected()
+    {
+        return _id;
     }
 
    /* void resetSelection()

@@ -83,7 +83,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
   add_executable(${PROJECT_NAME} 
 		labelimage.h 
-		widgetFocus.h 
+		widgetImage.h
 		gridButtons.h 
 		imageviewer2.h 
 		imageviewer2.cc

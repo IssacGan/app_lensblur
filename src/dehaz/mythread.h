@@ -5,13 +5,13 @@
 
 #include <QWidget>
 
-#include "widgetFocus.h"
+#include "widgetImage.h"
 
 class MyThread : public QThread
 {
     Q_OBJECT
 
-    WidgetFocus *gui;
+    WidgetImage *gui;
     
     QString path;
     QString dir;
@@ -21,7 +21,7 @@ class MyThread : public QThread
 
 public:
     
-    MyThread(WidgetFocus *window);
+    MyThread(WidgetImage *window);
     void setFile(QString file);
     void setDir(QString file);
     void setMode(int i);

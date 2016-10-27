@@ -46,7 +46,7 @@
  ImageViewer::ImageViewer()
  {
     
-     this->focusWidget = new WidgetFocus();
+     this->focusWidget = new WidgetImage();
      
      //lo asigno para que se vea
      setCentralWidget(focusWidget);//setCentralWidget(imageWidget);

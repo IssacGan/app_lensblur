@@ -1,5 +1,5 @@
-#ifndef WIDGETFOCUS_H
-#define WIDGETFOCUS_H
+#ifndef WIDGETIMAGE_H
+#define WIDGETIMAGE_H
 
 #include <QWidget>
 #include <QScrollArea>
@@ -19,12 +19,12 @@
 #define DEPTH_FAR_2 96.0
 #define DEPTH_FAR_3 32.0
 
-#define NO_FOG 255.0
+#define NO_FOG 200.0
 #define MIN_FOG 160.0
 #define MEDIUM_FOG 96.0
-#define MAX_FOG 30.0
+#define MAX_FOG 50.0
 
-class WidgetFocus : public QWidget
+class WidgetImage : public QWidget
 {
     Q_OBJECT
     
@@ -47,7 +47,7 @@ private:
 public:
     
     //construir la interfaz
-    WidgetFocus()
+    WidgetImage()
     {
         QHBoxLayout *layoutH = new QHBoxLayout;
         this->setWindowTitle("App Depth-of-Field simulation");
@@ -97,15 +97,15 @@ public:
         //conectar señales
         //click sobre opcion, cambiar color pincel
         QObject::connect(buttonOptions,  &GridButtons::optionSelected,
-                         this,&WidgetFocus::changeColorPaint);
+                         this,&WidgetImage::changeColorPaint);
         
         QObject::connect(imageToEdit, &LabelImage::mousePixelDown,
-                         this, &WidgetFocus::clickMousePixel);
+                         this, &WidgetImage::clickMousePixel);
         QObject::connect(imageToEdit, &LabelImage::mousePixelUp,
-                         this, &WidgetFocus::unclickMousePixel);
+                         this, &WidgetImage::unclickMousePixel);
         
         QObject::connect(imageToEdit, &LabelImage::mousePixelChanged,
-                         this, &WidgetFocus::updatePixel);
+                         this, &WidgetImage::updatePixel);
         
         //cambiar tamaño focus
         QObject::connect(sliderFocus, SIGNAL(valueChanged(int)), this, SLOT(updateSizeFocus(int)));
@@ -113,7 +113,7 @@ public:
         resize(sizeHint());
     }
     
-    ~WidgetFocus() {};
+    ~WidgetImage() {};
     
     void setInfo(QString sms)
     {
@@ -126,7 +126,7 @@ public:
         imageToEdit->resizeEvent(event);
         
         if (denseDepth != NULL )
-            blurImage();
+            processImage();
     }
     
     
@@ -164,7 +164,7 @@ public:
                 imageToEdit->setColorBlush(QColor::fromRgb(255, 0,0));
                 //   imageToEdit->setCanEdit(false);
                 // this->setCursor(Qt::PointingHandCursor);
-                blurImage();
+                processImage();
                 break;*/
                 
         }
@@ -183,7 +183,7 @@ public:
     void updateSizeFocus(int size)
     {
         _sizeFocus = size;//double (size)*3.0;
-        blurImage();
+        processImage();
     }
     
     //////////////// SUPERPIXELS + BINARY EQUATIONS
@@ -219,13 +219,13 @@ public:
         denseDepth->addEquations_Unaries(filename.toStdString());
         setInfo("Load input depth (all unary equations)");
         
-        blurImage();
+        processImage();
         setInfo("System Solved.");
     }
     
     void saveData(QString dir)
     {
-        blurImage(true,dir.toStdString());
+        processImage(true,dir.toStdString());
         setInfo("All files Saved.");
     }
     
@@ -267,7 +267,7 @@ public:
     void unclickMousePixel(int x, int y,QMouseEvent * event)
     {
         // if (imageToEdit->getCanEdit())        
-        blurImage();
+        processImage();
         
         if (buttonOptions->focusSelected())
             imageToEdit->enablePaint();
@@ -285,7 +285,7 @@ public:
          //fprintf(stderr,"_min: %f max: %f new: %f",_minFocus,_maxFocus,newDepth);
     }
     
-    void blurImage(bool save=false, string dir = "")
+    void processImage(bool save=false, string dir = "")
     {
         //show denseDepth estimation
         Mat sol = denseDepth->solve();
@@ -333,12 +333,12 @@ public:
         imshow("solution",sol_gray);
         cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         
-        imshow("dehaz",final);
+        //imshow("dehaz",final);
         
         cvtColor(final,final,CV_BGR2RGB);
         
-        //if (buttonOptions->focusSelected())
-           // imageToEdit->setImage(convertQtImage(final));//*/
+        if (buttonOptions->idSelected() != -1)
+            imageToEdit->setImage(convertQtImage(final));//*/
     }
     
     QImage convertQtImage(Mat _image)
@@ -349,4 +349,4 @@ public:
     
 };
 
-#endif // WIDGETFOCUS_H
+#endif

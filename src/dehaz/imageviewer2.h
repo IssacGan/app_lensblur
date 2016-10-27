@@ -75,7 +75,7 @@
      void createActions();
      void createMenus();
 
-     WidgetFocus* focusWidget;
+     WidgetImage* focusWidget;
 
      QAction *openAct;
      QAction *imageAct;

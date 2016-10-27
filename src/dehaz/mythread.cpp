@@ -1,6 +1,6 @@
 #include "mythread.h"
 
-MyThread::MyThread(WidgetFocus *window)
+MyThread::MyThread(WidgetImage *window)
 {
     this->gui=window;
 }
