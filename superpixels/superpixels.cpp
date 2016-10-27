@@ -10,6 +10,8 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include "tonemapping/tonemapping.h"
+
 using namespace cv;
 
 #include "superpixel.cpp"
@@ -192,11 +194,17 @@ public:
         
         //read image
         try{
-            _image = imread(path,CV_LOAD_IMAGE_COLOR);
+            string extension = path.substr(path.find_last_of(".")+1,path.length());
+            //printf("extension %s \n",().c_str());getchar();
+            if (extension == "hdr")
+                _image = load_hdr(path.c_str());
+            else
+                _image = imread(path,CV_LOAD_IMAGE_COLOR);
             
             if(_image.data == NULL)
             {
                 printf("Image %s not found\n",path.c_str());
+                
                 return;
             }
             else
