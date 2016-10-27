@@ -9,7 +9,7 @@
 #include "gridbuttons.h"
 #include "labelimage.h"
 
-#include "denseLabeling/denseLabeling.cpp"
+#include "denseLabeling.cpp"
 #include "depthoffielddefocus.h"
 
 #include <stdio.h>
