@@ -79,7 +79,7 @@ public:
         
         start = clock();
         
-        Mat  final=Mat::ones(_labels.rows,_labels.cols,CV_32F);
+        Mat  final=Mat::ones(_labels.rows,_labels.cols,CV_32FC1);
         
         //pinta imagen resultado
         // double min=10000, max=0;

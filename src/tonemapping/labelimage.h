@@ -50,7 +50,7 @@ public:
      {
          name = nameIm;
          image.load(nameIm);
-         
+        
          
          //ajustar al tamño original
         // QSize tamWidget = parentWidget()->size();
@@ -74,6 +74,21 @@ public:
          if (image.isNull()) return false;
          else return true;
     }
+    
+    bool initImageLabel(QImage imQT,QString nameIm="", int w=640, int h=320 )
+    {
+        name = nameIm;
+        image = imQT.copy();
+        
+        pixmap = QPixmap::fromImage(image);
+        //this->setPixmap(QPixmap::fromImage(image));
+        this->setPixmap(pixmap);//.scaled(image.width(), image.height(),Qt::KeepAspectRatio));
+        resize(sizeHint());//this->adjustSize();
+        
+        if (image.isNull()) return false;
+        else return true;
+    }
+
     
     void setImage(QImage image)
     {

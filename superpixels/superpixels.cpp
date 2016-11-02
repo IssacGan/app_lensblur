@@ -37,6 +37,7 @@ class SuperPixels
  
 protected:
     Mat _image; // original image in color BGR
+    Mat _imageHDR;
     Mat _ids; // superpixels ids  CV_8UC1
     Mat _sobel; //MASK superpixel boundaries  UCHAR
     Mat _labelsInput; //input labeling
@@ -194,12 +195,18 @@ public:
         //read image
         try{
             string extension = path.substr(path.find_last_of(".")+1,path.length());
-            //printf("extension %s \n",().c_str());getchar();
+            //printf("extension %s \n %s",extension.c_str(),path.c_str());getchar();
             if (extension == "hdr")
-                _image = load_hdr(path.c_str());
-            else//*/
+            {
+                _imageHDR = load_hdr(path.c_str()).clone();
+                //imshow("hdr",_imageHDR);
+                _image = _imageHDR.clone();
+                cvtColor(_image,_image,CV_BGR2RGB);
+                _image.convertTo(_image,CV_8UC3,255.0,0);
+            }
+            else
                 _image = imread(path,CV_LOAD_IMAGE_COLOR);
-            
+
             if(_image.data == NULL)
             {
                 printf("Image %s not found\n",path.c_str());
@@ -236,7 +243,6 @@ public:
             
             if (_DEBUG == 1) printf("**** TIME: load Superpixels: %f seconds\n",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC) );
         }
-        
         else
         {
             fclose(f);
@@ -271,6 +277,7 @@ public:
     
     Mat getImageLabelsInput() {return _labelsInput;}
     Mat getImageLabels() {return _labels;}
+    Mat getImageHDR(){ return _imageHDR;}
     Mat getImage()
     {
         if(_image.data == NULL)

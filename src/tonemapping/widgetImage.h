@@ -12,6 +12,8 @@
 #include "denseLabeling.cpp"
 #include "tonemapping/tonemapping.h"
 
+#include "imageHDR.h"
+
 #include <stdio.h>
 
 #define DEPTH_NEAR 224.0
@@ -191,13 +193,25 @@ public:
     {
         //mostrar imagen en la interfaz
         bool opened = imageToEdit->initImageLabel(filename,640,320);
+        if (!opened)
+        {
+            Mat im = load_hdr(filename.toStdString().c_str());
+            cvtColor(im,im,CV_BGR2RGB);
+            im.convertTo(im,CV_8U,255,0);
+            QImage imQT=convertQtImage(im);
+            
+            opened = imageToEdit->initImageLabel(imQT,filename,640,320);//try to open hdr
+            
+        }
         imageToEdit->setCanEdit(false);
-        
+
         denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
+        
         
         if (!denseDepth->isNotNullImage() || !opened )
         {
             setInfo("Problem to open the image!");
+
             return false;
         }
         else
@@ -205,6 +219,7 @@ public:
             setInfo("Image opened correctly.");
             imageToEdit->setCanEdit(true);
         }
+        
         //binary equations
         denseDepth->addEquations_BinariesBoundariesPerPixelMean();
        // denseDepth->addEquations_BinariesBoundariesPerPixel();
@@ -302,8 +317,11 @@ public:
         
         printf("Mat sol: min %f max %f slider %f MIN_T %f \n",min,max,_sizeFocus,min_t);
         
-        Mat final = tonemap(denseDepth->getImage(), sol, min_t, 1.0);
         
+        //imshow("hdr processImage",denseDepth->getImageHDR());
+        Mat sol_gray = sol * 255.0;
+        Mat final = tonemap(denseDepth->getImageHDR(), sol_gray, min_t, 1.0);
+        imshow("hdr.png",final);
         
         
         
@@ -316,7 +334,7 @@ public:
         Mat final = blur_image_depth(denseDepth->getImage(), sol_gray, nbins,focal_distance,focal_length,aperture, linear);
         */
         //
-        Mat sol_gray = sol * 255.0;
+       
         sol_gray.convertTo(sol_gray,CV_8UC1);
         
         if (save)
@@ -326,7 +344,7 @@ public:
             string name = dir + "/user_input.png";
             setInfo("Save images");
             imwrite(name,user);
-            name = dir + "/dehaz.png";
+            //name = dir + "/dehaz.png";
             imwrite(name,final);
             name = dir + "/depth.png";
             imwrite(name,sol_gray);
@@ -335,9 +353,9 @@ public:
         imshow("solution",sol_gray);
         cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         
-        //imshow("dehaz",final);
         
-        cvtColor(final,final,CV_BGR2RGB);
+        
+       /* cvtColor(final,final,CV_BGR2RGB);
         
         if (buttonOptions->idSelected() != -1)
             imageToEdit->setImage(convertQtImage(final));//*/
