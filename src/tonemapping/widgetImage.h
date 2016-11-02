@@ -10,7 +10,7 @@
 #include "labelimage.h"
 
 #include "denseLabeling.cpp"
-//#include "tonemapping/tonemapping.h"
+#include "tonemapping/tonemapping.h"
 
 #include <stdio.h>
 

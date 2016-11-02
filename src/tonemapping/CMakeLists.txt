@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.8.9)
   # PATH Qt: http://www.qt.io/download/
   ################################
 
-  set(Qt5_DIR /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake/Qt5) #CUSTOMIZE: installation Qt path
+   set(Qt5_DIR /Users/acambra/TESIS/code/libs/Qt/5.3/clang_64/lib/cmake/Qt5/) #CUSTOMIZE: installation Qt path
 
 
   ################################
@@ -79,7 +79,12 @@ cmake_minimum_required(VERSION 2.8.9)
   #     src
   ##################################################################################
   add_library(slic ../../libs/lib_slic/SLIC.cpp)
-  add_library(tonemapping ../../libs/tonemapping/tonemapping.cc)
+  
+  add_library(hdr ../../libs/imageHDR.cpp)
+  target_link_libraries(hdr ${OpenCV_LIBS})
+
+  #add_library(tonemapping ../../libs/tonemapping/tonemapping.cc)
+  #target_link_libraries(tonemapping ${OpenCV_LIBS} )
 
   add_executable(${PROJECT_NAME} 
 		labelimage.h 
@@ -94,10 +99,12 @@ cmake_minimum_required(VERSION 2.8.9)
 		../../superpixels/superpixels.cpp
 		../../superpixels/labelSet.cpp
 		../../denseLabeling/denseLabeling.cpp
-		../../libs/least-squares-linear-system2.h)
+		../../libs/least-squares-linear-system2.h
+        ../../libs/imageHDR.h
+		../../libs/tonemapping/tonemapping.cc)
 
 
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic tonemapping)
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic hdr)# tonemapping)
 
   # The Qt5Widgets_LIBRARIES variable also includes QtGui and QtCore
   qt5_use_modules(${PROJECT_NAME} Core Widgets)

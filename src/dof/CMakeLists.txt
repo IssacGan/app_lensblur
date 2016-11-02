@@ -14,7 +14,9 @@ cmake_minimum_required(VERSION 2.8.9)
   # PATH Qt: http://www.qt.io/download/
   ################################
 
-  set(Qt5_DIR /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake/Qt5) #CUSTOMIZE: installation Qt path
+  #set(Qt5_DIR /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake/Qt5) #CUSTOMIZE: installation Qt path
+   set(Qt5_DIR /Users/acambra/TESIS/code/libs/Qt/5.3/clang_64/lib/cmake/Qt5/) #CUSTOMIZE: installation Qt path
+
 
 
   ################################
@@ -70,24 +72,30 @@ cmake_minimum_required(VERSION 2.8.9)
   #     paths: include and lib
   ##################################################################################
 
-  include_directories(libs)
-  include_directories(libs/lib_slic)
-  include_directories(superpixels)  
+  include_directories(../../libs)
+  include_directories(../../libs/lib_slic)
+  include_directories(../../superpixels)  
 
   ##################################################################################
   #     src
   ##################################################################################
-  add_library(slic libs/lib_slic/SLIC.cpp)
-  add_library(blur libs/depthoffielddefocus.cc)
+  add_library(slic ../../libs/lib_slic/SLIC.cpp)
+  add_library(blur ../../libs/depthoffielddefocus.cc)
 
   add_executable(${PROJECT_NAME} 
-		src/dof/labelimage.h src/dof/widgetFocus.h src/dof/gridButtons.h src/dof/imageviewer2.h src/dof/imageviewer2.cc
-		src/dof/mythread.cpp src/dof/mythread.h src/dof/main.cc
-		superpixels/superpixel.cpp
-		superpixels/superpixels.cpp
-		superpixels/labelSet.cpp
-		denseLabeling/denseLabeling.cpp
-		libs/least-squares-linear-system2.h)
+		labelimage.h 
+		widgetFocus.h
+		gridButtons.h 
+		imageviewer2.h 
+		imageviewer2.cc
+		mythread.cpp 
+		mythread.h
+		main.cc
+		../../superpixels/superpixel.cpp
+		../../superpixels/superpixels.cpp
+		../../superpixels/labelSet.cpp
+		../../denseLabeling/denseLabeling.cpp
+		../../libs/least-squares-linear-system2.h)
 
 
   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic blur)

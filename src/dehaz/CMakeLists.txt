@@ -16,6 +16,8 @@ cmake_minimum_required(VERSION 2.8.9)
 
   set(Qt5_DIR /Users/acambra/Qt5.1.1/5.1.1/clang_64/lib/cmake/Qt5) #CUSTOMIZE: installation Qt path
 
+   set(Qt5_DIR /Users/acambra/TESIS/code/libs/Qt/5.3/clang_64/lib/cmake/Qt5/) #CUSTOMIZE: installation Qt path
+
 
   ################################
   # PATH OpenCV
@@ -80,6 +82,7 @@ cmake_minimum_required(VERSION 2.8.9)
   ##################################################################################
   add_library(slic ../../libs/lib_slic/SLIC.cpp)
   add_library(dehazing ../../libs/dehazing/dehazing.cc)
+  target_link_libraries(dehazing ${OpenCV_LIBS} )
 
   add_executable(${PROJECT_NAME} 
 		labelimage.h 

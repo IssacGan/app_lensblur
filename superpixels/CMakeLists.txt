@@ -34,6 +34,8 @@ cmake_minimum_required(VERSION 2.8.9)
   #     src
   ##################################################################################
   add_library(slic ../libs/lib_slic/SLIC.cpp)
+  add_library(hdr ../libs/imageHDR.cpp)
+  target_link_libraries(hdr ${OpenCV_LIBS})
 
   add_executable(${PROJECT_NAME}  
 	superpixel.cpp
@@ -43,5 +45,5 @@ cmake_minimum_required(VERSION 2.8.9)
 
 
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic hdr ${Boost_LIBRARIES})
 

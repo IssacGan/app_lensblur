@@ -10,8 +10,6 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
-#include "tonemapping/tonemapping.h"
-
 using namespace cv;
 
 #include "superpixel.cpp"
@@ -24,6 +22,7 @@ using namespace cv;
 #include <string>
 
 #include "lib_slic/SLIC.h"
+#include "imageHDR.h"
 
 #define PI 3.1416
 #define SP_MASK 1
@@ -198,7 +197,7 @@ public:
             //printf("extension %s \n",().c_str());getchar();
             if (extension == "hdr")
                 _image = load_hdr(path.c_str());
-            else
+            else//*/
                 _image = imread(path,CV_LOAD_IMAGE_COLOR);
             
             if(_image.data == NULL)
