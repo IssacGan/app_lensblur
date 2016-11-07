@@ -47,14 +47,14 @@ public:
         QString infoLandscape= "Draw green strokes with the mouse.\n Select the furthest objects.";
         QString infoFocus= "Draw red strokes.\n Select objects you want to show focused.";
 
-        portrait = new QRadioButton("NO FOG" );
+        portrait = new QRadioButton("MAKE DARKER" );
         portrait->setToolTip(infoPortrait);
         
-        landscape1 = new QRadioButton( "MIN FOG" );
+       /* landscape1 = new QRadioButton( "MIN FOG" );
         landscape1->setToolTip(infoLandscape);
         landscape2 = new QRadioButton( "MEDIUM FOG " );
-        landscape2->setToolTip(infoLandscape);
-        landscape3 = new QRadioButton( "MAX FOG" );
+        landscape2->setToolTip(infoLandscape);*/
+        landscape3 = new QRadioButton( "LIGHT UP" );
         landscape3->setToolTip(infoLandscape);
         
         /*focus = new QRadioButton( "Focus");
@@ -64,8 +64,8 @@ public:
 
         options->addButton( portrait );
         
-        options->addButton( landscape1 );
-        options->addButton( landscape2 );
+        //options->addButton( landscape1 );
+        //options->addButton( landscape2 );
         options->addButton( landscape3 );
         
        // options->addButton( focus );
@@ -108,8 +108,8 @@ public:
         //crear grid y añadir elementos
         QGridLayout *grid = new QGridLayout( parent );
         grid->addWidget( portrait, 0, 1 );
-        grid->addWidget( landscape1, 1, 1 );
-        grid->addWidget( landscape2, 2, 1 );
+        //grid->addWidget( landscape1, 1, 1 );
+        //grid->addWidget( landscape2, 2, 1 );
         grid->addWidget( landscape3, 3, 1 );
         //grid->addWidget( focus, 4, 1 );
 

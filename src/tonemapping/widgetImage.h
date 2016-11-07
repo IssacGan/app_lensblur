@@ -26,6 +26,9 @@
 #define MEDIUM_FOG 96.0
 #define MAX_FOG 50.0
 
+#define MAKE_DARKER 255.0
+#define LIGHT_UP 50.0
+
 class WidgetImage : public QWidget
 {
     Q_OBJECT
@@ -140,10 +143,10 @@ public:
             case ID_1:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 0,255));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=NO_FOG;//224;//250.0;
+                valueDepth=MAKE_DARKER;//224;//250.0;
                 // imageToEdit->setCanEdit(true);
                 break;
-            case ID_2:
+            /*case ID_2:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 255,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MIN_FOG;//160;//150.0;
@@ -154,11 +157,11 @@ public:
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MEDIUM_FOG;//96;//50.0;
                 //  imageToEdit->setCanEdit(true);
-                break;
+                break;*/
             case ID_4:
                 imageToEdit->setColorBlush(QColor::fromRgb(0, 75,0));
                 this->setCursor(Qt::PointingHandCursor);
-                valueDepth=MAX_FOG;//32;//10.0;
+                valueDepth=LIGHT_UP;//32;//10.0;
                 //   imageToEdit->setCanEdit(true);
                 break;
                 
@@ -321,7 +324,6 @@ public:
         //imshow("hdr processImage",denseDepth->getImageHDR());
         Mat sol_gray = sol * 255.0;
         Mat final = tonemap(denseDepth->getImageHDR(), sol_gray, min_t, 1.0);
-        imshow("hdr.png",final);
         
         
         
@@ -352,6 +354,7 @@ public:
         cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         imshow("solution",sol_gray);
         cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
+        imshow("hdr.png",final);
         
         
         

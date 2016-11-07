@@ -12,6 +12,8 @@
 #include "denseLabeling.cpp"
 #include "dehazing/dehazing.h"
 
+#include "imageHDR.h"
+
 #include <stdio.h>
 
 #define DEPTH_NEAR 224.0

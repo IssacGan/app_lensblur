@@ -16,7 +16,7 @@
 #include <sstream>
 #include <iomanip>
 
-std::string type2str(int type) {
+/*std::string type2str(int type) {
 	std::string r;
 
   uchar depth = type & CV_MAT_DEPTH_MASK;
@@ -46,7 +46,7 @@ std::string cvMat_description(const char* name, const cv::Mat& m)
     cv::minMaxLoc(m, &min, &max);
     sstr<<std::setw(20)<<name<<"\t - "<<m.size()<<"  "<<type2str(m.type())<<" ["<<min<<","<<max<<"]";
     return sstr.str();
-}
+}*/
 
 
 //Dehaze image
