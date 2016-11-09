@@ -61,7 +61,7 @@ cv::Mat interpolate_in_vector(const std::vector<cv::Mat>& source,
     return sol;
 }
 
-std::string type2str(int type) {
+/*std::string type2str(int type) {
 	std::string r;
 
   uchar depth = type & CV_MAT_DEPTH_MASK;
@@ -82,7 +82,7 @@ std::string type2str(int type) {
   r += (chans+'0');
 
   return r;
-}
+}*/
 
 float blur_size_from_distance(float distance, float focal_distance, float focal_length, float aperture, bool linear)
 {

@@ -11,6 +11,7 @@
 
 #include "denseLabeling.cpp"
 #include "depthoffielddefocus.h"
+#include "imageHDR.h"
 
 #include <stdio.h>
 

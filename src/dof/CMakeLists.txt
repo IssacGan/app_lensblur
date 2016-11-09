@@ -74,13 +74,18 @@ cmake_minimum_required(VERSION 2.8.9)
 
   include_directories(../../libs)
   include_directories(../../libs/lib_slic)
-  include_directories(../../superpixels)  
+  include_directories(../../superpixels) 
+  include_directories(../../denseLabeling)  
 
   ##################################################################################
   #     src
   ##################################################################################
   add_library(slic ../../libs/lib_slic/SLIC.cpp)
   add_library(blur ../../libs/depthoffielddefocus.cc)
+  target_link_libraries(blur ${OpenCV_LIBS} )
+
+  add_library(hdr ../../libs/imageHDR.cpp)
+  target_link_libraries(hdr ${OpenCV_LIBS} )
 
   add_executable(${PROJECT_NAME} 
 		labelimage.h 
@@ -95,10 +100,12 @@ cmake_minimum_required(VERSION 2.8.9)
 		../../superpixels/superpixels.cpp
 		../../superpixels/labelSet.cpp
 		../../denseLabeling/denseLabeling.cpp
-		../../libs/least-squares-linear-system2.h)
+		../../libs/least-squares-linear-system2.h
+        ../../libs/depthoffielddefocus.cc
+        ../../libs/imageHDR.cpp)
 
 
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic blur)
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic hdr blur)
 
   # The Qt5Widgets_LIBRARIES variable also includes QtGui and QtCore
   qt5_use_modules(${PROJECT_NAME} Core Widgets)
