@@ -245,7 +245,7 @@ public:
         }
         else
         {
-            fclose(f);
+//            fclose(f);
             
             if (_DEBUG == 1) start = clock();
             
@@ -394,8 +394,8 @@ public:
         }
         
         delete[] image;
-        delete(segmentation);
-        delete(labels);
+        delete[] segmentation;
+        delete[] labels;
         
     }
     

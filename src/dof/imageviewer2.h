@@ -42,6 +42,7 @@
  #define IMAGEVIEWER_H
 
 #include "mythread.h"
+#include "widgetFocus.h"
 
  #include <QMainWindow>
  #include <QAction>

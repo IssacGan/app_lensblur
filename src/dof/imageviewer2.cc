@@ -38,7 +38,7 @@
  **
  ****************************************************************************/
 
- #include "imageviewer2.h"
+#include "imageviewer2.h"
 
 #include <stdio.h>
 #include "mythread.h"

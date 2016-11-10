@@ -1,7 +1,7 @@
 #ifndef _BLUR_H_
 #define _BLUR_H_
 
-/*#include <iostream>
+//#include <iostream>
 //Opencv
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"

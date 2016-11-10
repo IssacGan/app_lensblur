@@ -6,7 +6,7 @@
 #include <QApplication>
 #include <QLabel>
 #include <QSlider>
-#include "gridbuttons.h"
+#include "gridButtons.h"
 #include "labelimage.h"
 
 #include "denseLabeling.cpp"

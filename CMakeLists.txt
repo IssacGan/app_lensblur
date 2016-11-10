@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-  project(app_dof)
+  project(app_image_editing)
 
   # Tell CMake to run moc when necessary:
   set(CMAKE_AUTOMOC ON)
@@ -34,8 +34,8 @@ cmake_minimum_required(VERSION 2.8.9)
   set( Qt5Gui_DIR  ${Qt5_DIR}/../Qt5Gui)
 	
   # Find packages Qt
-  find_package(Qt5)
-  find_package(Qt5Core )
+  # find_package(Qt5)
+  find_package(Qt5Core)
   find_package(Qt5Widgets)
   find_package(Qt5Gui)
 
@@ -63,9 +63,30 @@ cmake_minimum_required(VERSION 2.8.9)
   ##################################################################################
   #     Compiler FLAGS
   ##################################################################################
-  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=gnu++11 -stdlib=libc++")
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=gnu++11 -stdlib=libc++")
 
- 
+ if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") )
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mtune=native")
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+       set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Dsrandom=srand -Drandom=rand -D_USE_MATH_DEFINES -D_WIN")
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    message("Using Visual Studio, are you sure?")
+endif()
+  
+message(STATUS "Compiler  = ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "System    = ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Prefix    = ${CMAKE_PREFIX_PATH}")
+message(STATUS "Flags     = ${CMAKE_CXX_FLAGS}")
+message(STATUS "Build     = ${CMAKE_BUILD_TYPE}")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+   message(STATUS "R.Flags   = ${CMAKE_CXX_FLAGS_RELEASE}")
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+   message(STATUS "D.Flags   = ${CMAKE_CXX_FLAGS_DEBUG}")
+endif()
+
   ##################################################################################
   #     paths: include and lib
   ##################################################################################
@@ -73,25 +94,14 @@ cmake_minimum_required(VERSION 2.8.9)
   include_directories(libs)
   include_directories(libs/lib_slic)
   include_directories(superpixels)  
+  include_directories(denseLabeling)  
 
   ##################################################################################
   #     src
   ##################################################################################
-  add_library(slic libs/lib_slic/SLIC.cpp)
-  add_library(blur libs/depthoffielddefocus.cc)
-
-  add_executable(${PROJECT_NAME} 
-		src/dof/labelimage.h src/dof/widgetFocus.h src/dof/gridButtons.h src/dof/imageviewer2.h src/dof/imageviewer2.cc
-		src/dof/mythread.cpp src/dof/mythread.h src/dof/main.cc
-		superpixels/superpixel.cpp
-		superpixels/superpixels.cpp
-		superpixels/labelSet.cpp
-		denseLabeling/denseLabeling.cpp
-		libs/least-squares-linear-system2.h)
-
-
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} slic blur)
-
-  # The Qt5Widgets_LIBRARIES variable also includes QtGui and QtCore
-  qt5_use_modules(${PROJECT_NAME} Core Widgets)
+  add_subdirectory(src/dof)
+  add_subdirectory(src/tonemapping)
+  add_subdirectory(src/dehaz)
+  #  add_subdirectory(superpixels)
+  #  add_subdirectory(denseLabeling)
 

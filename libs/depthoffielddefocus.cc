@@ -185,8 +185,8 @@ std::vector<cv::Mat> create_depth_layers_with_interpolation(const cv::Mat& input
 cv::Mat blur_image_depth(const cv::Mat& image, const cv::Mat& depth, 
 		int nbins, float focal_distance, float focal_length, float aperture, bool linear) {
         
-	std::chrono::time_point<std::chrono::system_clock> start;
-        start = std::chrono::system_clock::now();
+//	std::chrono::time_point<std::chrono::system_clock> start;
+//        start = std::chrono::system_clock::now();
         cv::Mat sol;
         float ddepth = 255.0f/float(nbins);
 	cv::Mat acc_mask;
@@ -229,9 +229,9 @@ cv::Mat blur_image_depth(const cv::Mat& image, const cv::Mat& depth,
 cv::Mat blur_image_focal_distance(const cv::Mat& image, const cv::Mat& depth, 
 		int nbins, float focal_distance, float focal_length, float aperture, bool linear)
 {
-    std::chrono::time_point<std::chrono::system_clock> start;
+//    std::chrono::time_point<std::chrono::system_clock> start;
 
-    start = std::chrono::system_clock::now();
+//    start = std::chrono::system_clock::now();
     auto blurred = create_blurred(image, aperture*255.0/focal_length, nbins);
     
     cv::Mat distance_to_focus = cv::abs(depth - focal_distance);
