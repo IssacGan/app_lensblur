@@ -10,6 +10,13 @@ cmake_minimum_required(VERSION 2.8.9)
   ##################################################################################
   #     PATHS
   ##################################################################################
+
+  # Path for output executable files
+  IF(NOT (IS_DIRECTORY "${app_image_editing_SOURCE_DIR}/bin"))
+     file(MAKE_DIRECTORY "${app_image_editing_SOURCE_DIR}/bin")
+     set(EXECUTABLE_OUTPUT_PATH "${app_image_editing_SOURCE_DIR}/bin")
+  endif()
+
   ################################
   # PATH Qt: http://www.qt.io/download/
   ################################
@@ -39,31 +46,41 @@ cmake_minimum_required(VERSION 2.8.9)
   find_package(Qt5Widgets)
   find_package(Qt5Gui)
 
-  # The Qt5Widgets_INCLUDES also includes the include directories for
-  # dependencies QtCore and QtGui
-  include_directories(${Qt5Core_INCLUDES})
-  include_directories(${Qt5Widgets_INCLUDES})
+  if(${Qt5Core_FOUND})
+     # The Qt5Widgets_INCLUDES also includes the include directories for
+     # dependencies QtCore and QtGui
+     include_directories(${Qt5Core_INCLUDES})
+     include_directories(${Qt5Widgets_INCLUDES})
 
-  # We need add -DQT_WIDGETS_LIB when using QtWidgets in Qt 5.
-  add_definitions(${Qt5Core_DEFINITIONS})
-  add_definitions(${Qt5Widgets_DEFINITIONS})
+     # We need add -DQT_WIDGETS_LIB when using QtWidgets in Qt 5.
+     add_definitions(${Qt5Core_DEFINITIONS})
+     add_definitions(${Qt5Widgets_DEFINITIONS})
 
-  # Executables fail to build with Qt 5 in the default configuration
-  # without -fPIE. We add that here.
-  set(CMAKE_CXX_FLAGS "${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+     # Executables fail to build with Qt 5 in the default configuration
+     # without -fPIE. We add that here.
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+  endif()
 
   ##################################################################################
   #     OpenCV
   ##################################################################################
   
-  find_package(OpenCV REQUIRED)
-  include_directories(${OpenCV_INCLUDES})
-  link_directories(${OpenCV})
-  
+  find_package(OpenCV)
+  if(${OpenCV_FOUND})
+     include_directories(${OpenCV_INCLUDES})
+     link_directories(${OpenCV})
+  endif()
+
+
+  ##################################################################################
+  #     Boost
+  ##################################################################################
+ 
+  find_package(Boost COMPONENTS system filesystem program_options)
+	  
   ##################################################################################
   #     Compiler FLAGS
   ##################################################################################
-  #  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=gnu++11 -stdlib=libc++")
 
  if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel") )
     set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -102,6 +119,6 @@ endif()
   add_subdirectory(src/dof)
   add_subdirectory(src/tonemapping)
   add_subdirectory(src/dehaz)
-  #  add_subdirectory(superpixels)
-  #  add_subdirectory(denseLabeling)
+  add_subdirectory(superpixels)
+  add_subdirectory(denseLabeling)
 

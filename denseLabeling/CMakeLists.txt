@@ -1,6 +1,5 @@
  
-  find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
-
+if(${Boost_FOUND} AND ${OpenCV_FOUND})
   add_executable(denseLabeling  
 	../superpixels/superpixel.cpp
        	../superpixels/superpixels.cpp  
@@ -10,7 +9,6 @@
 	../libs/lib_slic/SLIC.cpp
         main_denseLabeling.cpp)
 
-
-
-target_link_libraries(denseLabeling ${OpenCV_LIBS} ${Boost_LIBRARIES})
+  target_link_libraries(denseLabeling ${OpenCV_LIBS} ${Boost_LIBRARIES})
+endif()
 

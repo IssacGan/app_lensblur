@@ -1,4 +1,5 @@
-add_executable(dof 
+if (${OpenCV_FOUND} AND ${Qt5Core_FOUND})
+  add_executable(dof 
 		labelimage.h 
 		widgetFocus.h
 		gridButtons.h 
@@ -16,5 +17,5 @@ add_executable(dof
         	../../libs/imageHDR.cpp
 		../../libs/lib_slic/SLIC.cpp)
 
-target_link_libraries(dof ${OpenCV_LIBS} Qt5::Gui Qt5::Core Qt5::Widgets)
-
+  target_link_libraries(dof ${OpenCV_LIBS} Qt5::Gui Qt5::Core Qt5::Widgets)
+endif()
