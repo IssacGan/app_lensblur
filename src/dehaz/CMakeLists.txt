@@ -1,6 +1,6 @@
 if (${OpenCV_FOUND} AND ${Qt5Core_FOUND})
   add_executable(dehazing 
-		labelimage.h 
+		../../gui/labelimage.h 
 		gridButtons.h 
 		imageviewer2.h 
 		imageviewer2.cc

@@ -1,6 +1,6 @@
 if (${OpenCV_FOUND} AND ${Qt5Core_FOUND})
   add_executable(dof 
-		labelimage.h 
+		../../gui/labelimage.h 
 		widgetFocus.h
 		gridButtons.h 
 		imageviewer2.h 

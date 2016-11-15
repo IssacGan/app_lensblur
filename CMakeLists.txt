@@ -108,6 +108,7 @@ endif()
   #     paths: include and lib
   ##################################################################################
 
+  include_directories(${app_image_editing_SOURCE_DIR})
   include_directories(libs)
   include_directories(libs/lib_slic)
   include_directories(superpixels)  

@@ -32,7 +32,7 @@ private:
 
 public:
     //explicit imageLabel(QWidget *parent = 0);
-    LabelImage()
+    LabelImage(QWidet* parent = 0) : QLabel(parent)
     {
         this->setBackgroundRole(QPalette::Base);
        // this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -40,9 +40,6 @@ public:
         this->setMouseTracking(true);
         //this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         this->setScaledContents(true);
-        
-        //this->setAlignment(Qt::AlignCenter);
-       // this->setMouseTracking(true);
     }
 
     //init imagen
@@ -74,7 +71,21 @@ public:
          if (image.isNull()) return false;
          else return true;
     }
-    
+
+    bool initImageLabel(QImage imQT,QString nameIm="", int w=640, int h=320 )
+    {
+        name = nameIm;
+        image = imQT.copy();
+        
+        pixmap = QPixmap::fromImage(image);
+        //this->setPixmap(QPixmap::fromImage(image));
+        this->setPixmap(pixmap);//.scaled(image.width(), image.height(),Qt::KeepAspectRatio));
+        resize(sizeHint());//this->adjustSize();
+        
+        if (image.isNull()) return false;
+        else return true;
+    }
+   
     void setImage(QImage image)
     {
         setPixmap(QPixmap::fromImage(image));

@@ -7,7 +7,7 @@
 #include <QLabel>
 #include <QSlider>
 #include "gridButtons.h"
-#include "labelimage.h"
+#include <gui/labelimage.h>
 
 #include "denseLabeling.cpp"
 #include "depthoffielddefocus.h"
