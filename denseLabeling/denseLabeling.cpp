@@ -52,7 +52,7 @@ public:
     
     Mat solve()
     {
-        clock_t start = clock();
+ //       clock_t start = clock();
         
         Optimization::LeastSquaresLinearSystem<double> unaryN;
         
@@ -73,11 +73,11 @@ public:
         
         x = equations.solve();
         
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  solve system %f seconds \n ",t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  solve system %f seconds \n ",t);
         
         
-        start = clock();
+//        start = clock();
         
         Mat  final=Mat::ones(_labels.rows,_labels.cols,CV_32FC1);
         
@@ -90,8 +90,8 @@ public:
             _labels.setTo(color,getMask(id));
         }
         
-        t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  build solution %f seconds \n ",t);
+//        t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  build solution %f seconds \n ",t);
         
         return final.clone();
         
@@ -101,7 +101,7 @@ public:
     
     void addEquations_Unaries(string nameLabels)
     {
-        clock_t start = clock();
+//        clock_t start = clock();
         
         initializeLabeling(nameLabels, MODE_LABEL_NOTZERO);
         
@@ -135,8 +135,8 @@ public:
             }
         }
         
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  Unaries (%d) %f seconds \n ",num_u,t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  Unaries (%d) %f seconds \n ",num_u,t);
     }
     
     void addEquation_Unary(int x,int y,float li, bool saveInput=false)
@@ -173,8 +173,8 @@ public:
             num_u++;
         }
         
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  ONE Unary (%d) %f seconds \n ",num_u,t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  ONE Unary (%d) %f seconds \n ",num_u,t);
         
     }
 
@@ -184,7 +184,7 @@ public:
     //compare color boundaries with image masks
     void addEquations_BinariesBoundaries(bool verbose=false)
     {
-        clock_t start = clock();
+//        clock_t start = clock();
         //bool save samples
         // bool saveIMAGES=true;
         //clock_t start = clock();
@@ -331,8 +331,8 @@ public:
         }
         
         //printf("\t * NUM BINARIES: %d \n ",nB);
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
         
         _lab.release();
         
@@ -343,7 +343,7 @@ public:
     //compare color pixel boundaries
     void addEquations_BinariesBoundariesPerPixel()
     {
-        clock_t start = clock();
+//        clock_t start = clock();
         //resetear las ecuaciones de color
         this->binaryCOLOR = Optimization::LeastSquaresLinearSystem<double>(maxID+1);
         this->binary = Optimization::LeastSquaresLinearSystem<double>(maxID+1);
@@ -466,7 +466,7 @@ public:
                                     //pixel
                                     /* image.at<Vec3b> (j,i)[0]=255;
                                      image.at<Vec3b> (j,i)[1]=0;
-                                     image.at<Vec3b> (j,i)[2]=0; //*/
+                                     image.at<Vec3b> (j,i)[2]=0; */
                                     
                                     if (num_bc > MAX_BINARIAS) {
                                         break;
@@ -545,8 +545,8 @@ public:
             }
         }//*/
         
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
         /* printf("**** Binarias pixel: %f seconds\n ",(float) (((double)(clock() - start)) / CLOCKS_PER_SEC));
          printf("\t Equations color: %d others: %d\n ",num_bc,num_b);*/
         
@@ -555,7 +555,7 @@ public:
     //compare mean color pixel boundaries
     void addEquations_BinariesBoundariesPerPixelMean()
     {
-        clock_t start = clock();
+//        clock_t start = clock();
         //resetear las ecuaciones de color
         this->binaryCOLOR = Optimization::LeastSquaresLinearSystem<double>(maxID+1);
         this->binary = Optimization::LeastSquaresLinearSystem<double>(maxID+1);
@@ -684,8 +684,8 @@ public:
             }
         }
     
-        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
+//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
+//        printf("\t * TIME  Binaries (%d) color (%d) %f seconds \n ",num_b,num_bc,t);
         
     }
 
