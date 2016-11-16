@@ -195,23 +195,13 @@ public:
     bool loadData(QString filename)
     {
         //mostrar imagen en la interfaz
-        bool opened = imageToEdit->initImageLabel(filename,640,320);
-        if (!opened)
-        {
-            Mat im = load_hdr(filename.toStdString().c_str());
-            cvtColor(im,im,CV_BGR2RGB);
-            im.convertTo(im,CV_8U,255,0);
-            QImage imQT=convertQtImage(im);
-            
-            opened = imageToEdit->initImageLabel(imQT,filename,640,320);//try to open hdr
-            
-        }
+        imageToEdit->setImage(filename);
         imageToEdit->setCanEdit(false);
 
         denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
         
         
-        if (!denseDepth->isNotNullImage() || !opened )
+        if (!denseDepth->isNotNullImage())
         {
             setInfo("Problem to open the image!");
 

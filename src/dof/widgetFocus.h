@@ -186,12 +186,12 @@ public:
     bool loadData(QString filename)
     {
         //mostrar imagen en la interfaz
-        bool opened = imageToEdit->initImageLabel(filename,640,320);
+        imageToEdit->setImage(filename);
         imageToEdit->setCanEdit(false);
         
         denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
         
-        if (!denseDepth->isNotNullImage() || !opened )
+        if (!denseDepth->isNotNullImage())
         {
             setInfo("Problem to open the image!");
             return false;

@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QImage>
 #include <iostream>
+#include <opencv2/core/core.hpp>
+#include <imageHDR.h>
 
 class LabelImage : public QLabel
 {
@@ -39,10 +41,8 @@ private:
 		QSize tamOri  = pixmap.size();
 		QSize tamDest = this->size();
 		if ((tamOri.width()>0) && (tamDest.width()>0) && (tamOri.height()>0) && (tamDest.height()>0)) {
-			if ((tamOri.height()/tamOri.width()) > (tamDest.height()/tamDest.width()))
-				return float(tamDest.height())/float(tamOri.height());
-			else
-				return float(tamDest.width())/float(tamOri.width());
+			return std::min(float(tamDest.height())/float(tamOri.height()),
+					float(tamDest.width())/float(tamOri.width()));
 		}
 		else return 0.0f;	
 	}
@@ -58,8 +58,8 @@ private:
 	void updatePositionFromMouse(int x, int y)
 	{
 		float s = scale();
-		_x = int(s*float(x));
-		_y = int(s*float(y));
+		_x = int(float(x)/s);
+		_y = int(float(y)/s);
 	}	
 
 public:
@@ -93,60 +93,19 @@ public:
 	}
     }
 
+
+    void setImage(const cv::Mat& image)
+    {
+        //QImage point to the data of _image
+        setImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888));
+    }
+    
     void setImage(const QString& name)
     {
-	setImage(QImage(name));
+	    if (name.endsWith(".hdr")) setImage(load_hdr(name.toStdString().c_str()));
+	    else setImage(QImage(name));
     }
 
-    //init imagen
-    bool initImageLabel(QString nameIm="", int w=640, int h=320 )
-    {
-         name = nameIm;
-	 setImage(nameIm);
-/*         image.load(nameIm);
-         
-         
-         //ajustar al tamño original
-        // QSize tamWidget = parentWidget()->size();
-         
-        // float newHeight = (float)image.height()/(float)image.width() * (float)parentWidget()->size().width();
-         
-         pixmap = QPixmap::fromImage(image);
-         //this->setPixmap(QPixmap::fromImage(image));
-         this->setPixmap(pixmap);//.scaled(image.width(), image.height(),Qt::KeepAspectRatio));
-         resize(sizeHint());//this->adjustSize();
-         
-         
-       //  QSize tamWidget= parentWidget()->size();
-       // image = image.scaled(tamWidget.width(),tamWidget.height(),Qt::KeepAspectRatio);
-       //  this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        // setMinimumSize(image.width(),image.height());//image.width(),image.height());
-
-         
-        // this->setPixmap(QPixmap::fromImage(image));*/
-
-//         if (image.isNull()) return false;
-         return true;
-    }
-
-    bool initImageLabel(const QImage& imQT,QString nameIm="", int w=640, int h=320 )
-    {
-	setImage(imQT);
-	return true;
-/*
-        name = nameIm;
-        image = imQT.copy();
-        
-        pixmap = QPixmap::fromImage(image);
-        //this->setPixmap(QPixmap::fromImage(image));
-        this->setPixmap(pixmap);//.scaled(image.width(), image.height(),Qt::KeepAspectRatio));
-        resize(sizeHint());//this->adjustSize();
-        
-        if (image.isNull()) return false;
-        else return true;*/
-    }
-   
-    
     //activar solo desde fuera
     void setCanEdit(bool status)
     {
