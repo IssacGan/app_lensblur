@@ -79,12 +79,12 @@ public:
         
         layoutH->addLayout(buttons);
         
-        QScrollArea *boxImage = new QScrollArea;
+//        QScrollArea *boxImage = new QScrollArea;
         
-        boxImage->setWidget(imageToEdit);
+ //       boxImage->setWidget(imageToEdit);
         
         QVBoxLayout *image = new QVBoxLayout;
-        image -> addWidget(boxImage);
+        image -> addWidget(imageToEdit);
         
         
         //add label de info
@@ -289,6 +289,7 @@ public:
     
     void processImage(bool save=false, string dir = "")
     {
+
         //show denseDepth estimation
         Mat sol = denseDepth->solve();
         
@@ -302,7 +303,7 @@ public:
         double min_t = ((_sizeFocus/100.0)*min) + ((1.0 - (_sizeFocus/100.0))*max);//0.05;
         double max_t = max;//0.95;
         
-        printf("Mat sol: min %f max %f slider %f MIN_T %f \n",min,max,_sizeFocus,min_t);
+//      printf("Mat sol: min %f max %f slider %f MIN_T %f \n",min,max,_sizeFocus,min_t);
         
         Mat final = dehaze(denseDepth->getImage(), sol, min_t, max_t);
         
@@ -332,7 +333,7 @@ public:
             imwrite(name,sol_gray);
         }
         cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
-        imshow("solution",sol_gray);
+ //       imshow("solution",sol_gray);
         cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         
         //imshow("dehaz",final);

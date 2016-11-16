@@ -14,9 +14,9 @@ cmake_minimum_required(VERSION 2.8.9)
   # Path for output executable files
   IF(NOT (IS_DIRECTORY "${app_image_editing_SOURCE_DIR}/bin"))
      file(MAKE_DIRECTORY "${app_image_editing_SOURCE_DIR}/bin")
-     set(EXECUTABLE_OUTPUT_PATH "${app_image_editing_SOURCE_DIR}/bin")
   endif()
-
+  set(EXECUTABLE_OUTPUT_PATH "${app_image_editing_SOURCE_DIR}/bin")
+  
   ################################
   # PATH Qt: http://www.qt.io/download/
   ################################
