@@ -117,9 +117,9 @@ endif()
   ##################################################################################
   #     src
   ##################################################################################
+  add_subdirectory(src/dehaz)
   add_subdirectory(src/dof)
   add_subdirectory(src/tonemapping)
-  add_subdirectory(src/dehaz)
   add_subdirectory(superpixels)
   add_subdirectory(denseLabeling)
 

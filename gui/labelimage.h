@@ -1,5 +1,4 @@
-#ifndef LABEL_IMAGE
-#define LABEL_IMAGE
+#pragma once
 
 #include <QWidget>
 #include <QLabel>
@@ -14,24 +13,12 @@ class LabelImage : public QLabel
 {
     Q_OBJECT
 private:
-    QString name;
-    QImage image;//image original sin cambiar su tamaño
     QPixmap pixmap; //pixmap original sin cambiar su tamaño
 
-    //draw
-    bool canEdit = false;
-    bool paint = false;
-    QColor colorBlush = QColor::fromRgb(0, 0,0);
-    QPainter painter;
-
-    //pixel selected
+     //pixel selected
     int _x=0;
     int _y=0;
     
-    //resize
-   // double zoomFactor=1.0;
-    
-
   	float mouseMovementEventPeriod; // period between notifying two mouse movement events, in seconds.  
 	unsigned long lastMouseMovementEvent;
 
@@ -84,12 +71,10 @@ public:
 	updatePixmap();
     }
 
-    void setImage(const QImage& im)
+    void setImage(const QImage& image)
     {
-	if (!im.isNull()) {
-		image = im;
+	if (!image.isNull()) {
 		setImage(QPixmap::fromImage(image));
-
 	}
     }
 
@@ -106,49 +91,14 @@ public:
 	    else setImage(QImage(name));
     }
 
-    //activar solo desde fuera
-    void setCanEdit(bool status)
-    {
-        canEdit = status;
-    }
-    
-    bool getCanEdit()
-    {
-        return canEdit;
-    }
-    
-    void enablePaint()
-    {
-        paint=true;
-    }
-    
-    void disablePaint()
-    {
-        paint=false;
-    }
+    bool editable() const { return !pixmap.isNull(); }
 
-    //DRAW over image
-    void setColorBlush(QColor color)
-    {
-        //cambiar color del pixel del raton
-        colorBlush = color;
-    }
-
-    //resetear la imagen original. Borrar las ediciones
-    void resetImage()
-    {
-        pixmap = QPixmap::fromImage(image);
-        this->setPixmap(QPixmap::fromImage(image));
-    }
-
-//protected:
 
     //Eventos MOUSE
     void mouseMoveEvent(QMouseEvent *event)
     {
 	if ((!pixmap.isNull()) && (0.001f*float(event->timestamp() - lastMouseMovementEvent)>=mouseMovementEventPeriod)) {
 		this->updatePositionFromMouse(event->x(), event->y());
-		if (paint) drawStroke(event);
 		emit mousePixelChanged(_x, _y);
 		lastMouseMovementEvent=event->timestamp();
 	} 
@@ -158,18 +108,6 @@ public:
     {
 	if ((!pixmap.isNull()) && (0.001f*float(event->timestamp() - lastMouseMovementEvent)>=mouseMovementEventPeriod)) {
 		this->updatePositionFromMouse(event->x(), event->y());
-                if (event->button()== Qt::LeftButton)
-                {
-                    enablePaint();
-                    drawStroke(event);
-                }
-                else if (event->button()== Qt::RightButton)
-                {
-                    resetImage();
-                    disablePaint();
-                    //fprintf(stderr,"Antes de emitir la señal");
-                    emit removeImageStrokes();
-                }
         	emit mousePixelDown(_x, _y, event);
 		emit mousePixelChanged(_x, _y);
 		lastMouseMovementEvent=event->timestamp();
@@ -180,46 +118,15 @@ public:
     {
 	if ((!pixmap.isNull()) && (0.001f*float(event->timestamp() - lastMouseMovementEvent)>=mouseMovementEventPeriod)) {
 		this->updatePositionFromMouse(event->x(), event->y());
-		disablePaint();
-        	emit mousePixelUp(_x, _y, event);
 		emit mousePixelChanged(_x, _y);
+        	emit mousePixelUp(_x, _y, event);
 		lastMouseMovementEvent=event->timestamp();
 	}
     }	
 
-    //dibujar
-    void drawStroke(QMouseEvent *event)
-    {
-        if (paint & canEdit)
-        {         
-            QPainter painter(&pixmap);
-            painter.setBrush(QBrush(colorBlush));
-            
-            QSize tamOri = image.size();
-            painter.drawEllipse(_x, _y,0.025*tamOri.width(),0.025*tamOri.width());
-	    updatePixmap();
-        }
-    }
-    
     void resizeEvent(QResizeEvent* event)
     {
 	this->updatePixmap();
-     /*   //calcular zoom ratio
-        QSize tamOri = image.size();
-        
-        if (tamOri.width()!=0)
-        {
-			
-             float newHeight = (float)tamOri.height()/(float)tamOri.width() * (float)parentWidget()->size().width();
-           // float newWidht = (float)tamOri.width()/(float)tamOri.height() * (float)parentWidget()->size().height();
-      
-        
-            this->setPixmap(pixmap.scaled(parentWidget()->size().width(), newHeight,Qt::KeepAspectRatio));
-            // this->setPixmap(pixmap.scaled(newWidht, parentWidget()->size().height(),Qt::KeepAspectRatio));
-        
-            this->adjustSize();
-        }
-        //fprintf(stderr,"resize label %d %d\n",image.width(),image.height());*/
     }
 
 //señales a emitir y capturar desde fuera
@@ -227,8 +134,5 @@ signals:
     void mousePixelChanged(int x, int y);
     void mousePixelDown(int x, int y,QMouseEvent *event);
     void mousePixelUp(int x, int y,QMouseEvent *event);
-    void removeImageStrokes();
-    
 };
 
-#endif // LABEL_IMAGE

@@ -8,6 +8,7 @@
 #include <QSlider>
 #include "gridButtons.h"
 #include <gui/labelimage.h>
+#include <gui/brushableimage.h>
 
 #include "denseLabeling.cpp"
 #include "dehazing/dehazing.h"
@@ -21,10 +22,10 @@
 #define DEPTH_FAR_2 96.0
 #define DEPTH_FAR_3 32.0
 
-#define NO_FOG 200.0
+#define NO_FOG 255.0
 #define MIN_FOG 160.0
 #define MEDIUM_FOG 96.0
-#define MAX_FOG 50.0
+#define MAX_FOG 30.0
 
 class WidgetImage : public QWidget
 {
@@ -34,7 +35,8 @@ private:
     
     //interfaz
     GridButtons *buttonOptions;
-    LabelImage  *imageToEdit = new LabelImage();
+    LabelImage  *imageToEdit;
+    BrushableImage *brushable;
     
     QLabel* info = new QLabel();
     
@@ -49,7 +51,8 @@ private:
 public:
     
     //construir la interfaz
-    WidgetImage()
+    WidgetImage() :
+	    imageToEdit(new LabelImage()), brushable(new BrushableImage())
     {
         QHBoxLayout *layoutH = new QHBoxLayout;
         this->setWindowTitle("App Depth-of-Field simulation");
@@ -94,6 +97,8 @@ public:
         
         layoutH->addLayout(image);
         setLayout(layoutH);
+
+	brushable->connectToLabelImage(imageToEdit);
         
         
         //conectar señales
@@ -138,25 +143,25 @@ public:
         switch (id)
         {
             case ID_1:
-                imageToEdit->setColorBlush(QColor::fromRgb(0, 0,255));
+                brushable->setColorBrush(QColor::fromRgb(0, 0,255));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=NO_FOG;//224;//250.0;
                 // imageToEdit->setCanEdit(true);
                 break;
             case ID_2:
-                imageToEdit->setColorBlush(QColor::fromRgb(0, 255,0));
+                brushable->setColorBrush(QColor::fromRgb(0, 255,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MIN_FOG;//160;//150.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
             case ID_3:
-                imageToEdit->setColorBlush(QColor::fromRgb(0, 150,0));
+                brushable->setColorBrush(QColor::fromRgb(0, 150,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MEDIUM_FOG;//96;//50.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
             case ID_4:
-                imageToEdit->setColorBlush(QColor::fromRgb(0, 75,0));
+                brushable->setColorBrush(QColor::fromRgb(0, 75,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MAX_FOG;//32;//10.0;
                 //   imageToEdit->setCanEdit(true);
@@ -189,12 +194,13 @@ public:
     }
     
     //////////////// SUPERPIXELS + BINARY EQUATIONS
-    bool loadData(QString filename)
+    bool loadData(const QString& filename)
     {
-        //mostrar imagen en la interfaz
-        imageToEdit->setImage(filename);
-        imageToEdit->setCanEdit(false);
-        
+	    QImage qim(filename);
+            //mostrar imagen en la interfaz
+            imageToEdit->setImage(qim);
+            brushable->setImage(qim);
+
         denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
         
         if (!denseDepth->isNotNullImage())
@@ -205,7 +211,6 @@ public:
         else
         {
             setInfo("Image opened correctly.");
-            imageToEdit->setCanEdit(true);
         }
         //binary equations
         denseDepth->addEquations_BinariesBoundariesPerPixelMean();
@@ -236,9 +241,7 @@ public:
     //////// MOUSE
     void updatePixel(int x, int y)
     {
-        if (buttonOptions->focusSelected())
-            imageToEdit->disablePaint();
-        else if (imageToEdit->getCanEdit())
+        if (imageToEdit->editable())
         {
             setInfo("Add new unary equation");
             denseDepth->addEquation_Unary(x,y,valueDepth/255.0);
@@ -249,7 +252,7 @@ public:
     {
         if (event->button() == Qt::LeftButton)
         {
-            if (imageToEdit->getCanEdit())
+            if (imageToEdit->editable())
             {
                 //imageToEdit->enablePaint();
                 //si blur activado: cambiar color
@@ -270,9 +273,6 @@ public:
     {
         // if (imageToEdit->getCanEdit())        
         processImage();
-        
-        if (buttonOptions->focusSelected())
-            imageToEdit->enablePaint();
     }
     
     void updateFocus(int x, int y)
@@ -332,16 +332,16 @@ public:
             name = dir + "/depth.png";
             imwrite(name,sol_gray);
         }
-        cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
- //       imshow("solution",sol_gray);
-        cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
+//        cv::resize(sol_gray, sol_gray, Size(imageToEdit->size().width(),imageToEdit->size().height()));
+//       imshow("solution",sol_gray);
+//        cv::resize(final, final, Size(imageToEdit->size().width(),imageToEdit->size().height()));
         
         //imshow("dehaz",final);
         
         cvtColor(final,final,CV_BGR2RGB);
         
         if (buttonOptions->idSelected() != -1)
-            imageToEdit->setImage(convertQtImage(final));//*/
+            imageToEdit->setImage(final);//*/
     }
     
     QImage convertQtImage(Mat _image)
