@@ -8,7 +8,9 @@
 #include <QSlider>
 #include "gridButtons.h"
 #include <gui/labelimage.h>
-#include <gui/brushableimage.h>
+#include <gui/imagemousebrush.h>
+#include <gui/multiimageviewer.h>
+
 
 #include "denseLabeling.cpp"
 #include "dehazing/dehazing.h"
@@ -32,11 +34,17 @@ class WidgetImage : public QWidget
     Q_OBJECT
     
 private:
+	    std::shared_ptr<QPixmap> strokes_pixmap;
+	    std::shared_ptr<cv::Mat> input_image;
+	    std::shared_ptr<cv::Mat> filtered_image;
+	    std::shared_ptr<cv::Mat> propagated_channel;
     
     //interfaz
-    GridButtons *buttonOptions;
-    LabelImage  *imageToEdit;
-    BrushableImage *brushable;
+    GridButtons     *buttonOptions;
+    ImageMouseBrush *imageMouseBrush;
+    MultiImageViewer *multiImageViewer;
+
+    int buttonIdStrokes, buttonIdInput, buttonIdFiltered, buttonIdChannel;
     
     QLabel* info = new QLabel();
     
@@ -52,7 +60,8 @@ public:
     
     //construir la interfaz
     WidgetImage() :
-	    imageToEdit(new LabelImage()), brushable(new BrushableImage())
+	    strokes_pixmap(std::make_shared<QPixmap>()), input_image(std::make_shared<cv::Mat>()), filtered_image(std::make_shared<cv::Mat>()),propagated_channel(std::make_shared<cv::Mat>()),
+	    imageMouseBrush(new ImageMouseBrush(input_image, strokes_pixmap)), multiImageViewer(new MultiImageViewer())
     {
         QHBoxLayout *layoutH = new QHBoxLayout;
         this->setWindowTitle("App Depth-of-Field simulation");
@@ -87,18 +96,23 @@ public:
  //       boxImage->setWidget(imageToEdit);
         
         QVBoxLayout *image = new QVBoxLayout;
-        image -> addWidget(imageToEdit);
+        image->addWidget(multiImageViewer);
         
         
         //add label de info
         info->setFrameStyle(QFrame::Panel | QFrame::Sunken);
         info->setFixedSize(640,20);
-        image -> addWidget(info);
+        image->addWidget(info);
         
         layoutH->addLayout(image);
         setLayout(layoutH);
 
-	brushable->connectToLabelImage(imageToEdit);
+	imageMouseBrush->connectToLabelImage(multiImageViewer->labelImage());
+	buttonIdInput    = multiImageViewer->add("Input",input_image);
+	buttonIdStrokes  = multiImageViewer->add("Strokes",imageMouseBrush->getPixmap());
+	buttonIdFiltered = multiImageViewer->add("Filtered",filtered_image);
+	buttonIdChannel = multiImageViewer->add("Transmittance",propagated_channel);
+
         
         
         //conectar señales
@@ -106,12 +120,12 @@ public:
         QObject::connect(buttonOptions,  &GridButtons::optionSelected,
                          this,&WidgetImage::changeColorPaint);
         
-        QObject::connect(imageToEdit, &LabelImage::mousePixelDown,
+        QObject::connect(multiImageViewer->labelImage(), &LabelImage::mousePixelDown,
                          this, &WidgetImage::clickMousePixel);
-        QObject::connect(imageToEdit, &LabelImage::mousePixelUp,
+        QObject::connect(multiImageViewer->labelImage(), &LabelImage::mousePixelUp,
                          this, &WidgetImage::unclickMousePixel);
         
-        QObject::connect(imageToEdit, &LabelImage::mousePixelChanged,
+        QObject::connect(multiImageViewer->labelImage(), &LabelImage::mousePixelChanged,
                          this, &WidgetImage::updatePixel);
         
         //cambiar tamaño focus
@@ -119,8 +133,6 @@ public:
         
         resize(sizeHint());
     }
-    
-    ~WidgetImage() {};
     
     void setInfo(QString sms)
     {
@@ -130,7 +142,7 @@ public:
     
     void resizeEvent(QResizeEvent* event)
     {
-        imageToEdit->resizeEvent(event);
+        // imageToEdit->resizeEvent(event);
         
         if (denseDepth != NULL )
             processImage();
@@ -143,25 +155,25 @@ public:
         switch (id)
         {
             case ID_1:
-                brushable->setColorBrush(QColor::fromRgb(0, 0,255));
+                imageMouseBrush->setColorBrush(QColor::fromRgb(0, 0,255));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=NO_FOG;//224;//250.0;
                 // imageToEdit->setCanEdit(true);
                 break;
             case ID_2:
-                brushable->setColorBrush(QColor::fromRgb(0, 255,0));
+                imageMouseBrush->setColorBrush(QColor::fromRgb(0, 255,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MIN_FOG;//160;//150.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
             case ID_3:
-                brushable->setColorBrush(QColor::fromRgb(0, 150,0));
+                imageMouseBrush->setColorBrush(QColor::fromRgb(0, 150,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MEDIUM_FOG;//96;//50.0;
                 //  imageToEdit->setCanEdit(true);
                 break;
             case ID_4:
-                brushable->setColorBrush(QColor::fromRgb(0, 75,0));
+                imageMouseBrush->setColorBrush(QColor::fromRgb(0, 75,0));
                 this->setCursor(Qt::PointingHandCursor);
                 valueDepth=MAX_FOG;//32;//10.0;
                 //   imageToEdit->setCanEdit(true);
@@ -196,10 +208,14 @@ public:
     //////////////// SUPERPIXELS + BINARY EQUATIONS
     bool loadData(const QString& filename)
     {
-	    QImage qim(filename);
+	    load_image(filename.toStdString().c_str(), input_image);
+	    imageMouseBrush->clear();
+	    *filtered_image = *input_image;
+
             //mostrar imagen en la interfaz
-            imageToEdit->setImage(qim);
-            brushable->setImage(qim);
+	    multiImageViewer->setButton(buttonIdInput);
+//            imageToEdit->set(input_image);
+//            imageMouseBrush->setImage(input_image);
 
         denseDepth =  new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
         
@@ -241,10 +257,11 @@ public:
     //////// MOUSE
     void updatePixel(int x, int y)
     {
-        if (imageToEdit->editable())
+        if (input_image)
         {
             setInfo("Add new unary equation");
             denseDepth->addEquation_Unary(x,y,valueDepth/255.0);
+	    multiImageViewer->setButton(buttonIdStrokes);
         }
     }
     
@@ -252,7 +269,7 @@ public:
     {
         if (event->button() == Qt::LeftButton)
         {
-            if (imageToEdit->editable())
+            if (input_image)
             {
                 //imageToEdit->enablePaint();
                 //si blur activado: cambiar color
@@ -266,6 +283,7 @@ public:
                     denseDepth->addEquation_Unary(x,y,valueDepth/255.0);
                 }
             }
+	    multiImageViewer->setButton(buttonIdStrokes);
         }
     }
     
@@ -291,11 +309,11 @@ public:
     {
 
         //show denseDepth estimation
-        Mat sol = denseDepth->solve();
+        *propagated_channel = denseDepth->solve();
         
         
         double min, max;
-        minMaxLoc(sol, &min, &max);
+	cv::minMaxLoc(*propagated_channel, &min, &max);
         
         
         
@@ -305,8 +323,7 @@ public:
         
 //      printf("Mat sol: min %f max %f slider %f MIN_T %f \n",min,max,_sizeFocus,min_t);
         
-        Mat final = dehaze(denseDepth->getImage(), sol, min_t, max_t);
-        
+        *filtered_image = dehaze(*input_image, *propagated_channel, min_t, max_t);
         
         //BLUR
         /*int   nbins          = 8;
@@ -317,18 +334,18 @@ public:
         Mat final = blur_image_depth(denseDepth->getImage(), sol_gray, nbins,focal_distance,focal_length,aperture, linear);
         */
         //
-        Mat sol_gray = sol * 255.0;
-        sol_gray.convertTo(sol_gray,CV_8UC1);
         
         if (save)
         {
+        	Mat sol_gray = (*propagated_channel) * 255.0;
+        	sol_gray.convertTo(sol_gray,CV_8UC1);
             Mat user = denseDepth->getImageLabelsInput() * 255.0;
             user.convertTo(user, CV_8UC1);            
             string name = dir + "/user_input.png";
             setInfo("Save images");
             imwrite(name,user);
             name = dir + "/dehaz.png";
-            imwrite(name,final);
+            imwrite(name,*filtered_image);
             name = dir + "/depth.png";
             imwrite(name,sol_gray);
         }
@@ -338,18 +355,11 @@ public:
         
         //imshow("dehaz",final);
         
-        cvtColor(final,final,CV_BGR2RGB);
-        
-        if (buttonOptions->idSelected() != -1)
-            imageToEdit->setImage(final);//*/
+	
+	multiImageViewer->setButton(buttonIdFiltered);
+//        if (buttonOptions->idSelected() != -1)
+//            imageToEdit->set(filtered_image);//*/
     }
-    
-    QImage convertQtImage(Mat _image)
-    {
-        //QImage point to the data of _image
-        return QImage(_image.data, _image.cols, _image.rows, _image.step, QImage::Format_RGB888);
-    }
-    
 };
 
 #endif

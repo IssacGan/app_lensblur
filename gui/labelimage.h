@@ -4,10 +4,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QMouseEvent>
-#include <QImage>
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <imageHDR.h>
+#include "imageformats.h"
 
 class LabelImage : public QLabel
 {
@@ -47,11 +44,15 @@ private:
 		float s = scale();
 		_x = int(float(x)/s);
 		_y = int(float(y)/s);
+		if (_x>=pixmap.width()) _x=pixmap.width()-1;
+		if (_x<0) _x=0;
+		if (_y>=pixmap.height()) _y=pixmap.height()-1;
+		if (_y<0) _y=0;
 	}	
 
 public:
     //explicit imageLabel(QWidget *parent = 0);
-    LabelImage(QWidget* parent = 0) : QLabel(parent), mouseMovementEventPeriod(0.05), lastMouseMovementEvent(0)
+    LabelImage(QWidget* parent = 0) : QLabel(parent), mouseMovementEventPeriod(0.01), lastMouseMovementEvent(0)
     {
         this->setBackgroundRole(QPalette::Base);
 	this->setMinimumSize(1,1);
@@ -65,31 +66,16 @@ public:
     void setMouseMovementEventPeriod(float p) { mouseMovementEventPeriod=p; }
 
 
-    void setImage(const QPixmap& p)
+    void set(const QPixmap& p)
     {
 	pixmap=p;
 	updatePixmap();
     }
 
-    void setImage(const QImage& image)
-    {
-	if (!image.isNull()) {
-		setImage(QPixmap::fromImage(image));
-	}
-    }
-
-
-    void setImage(const cv::Mat& image)
-    {
-        //QImage point to the data of _image
-        setImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888));
-    }
-    
-    void setImage(const QString& name)
-    {
-	    if (name.endsWith(".hdr")) setImage(load_hdr(name.toStdString().c_str()));
-	    else setImage(QImage(name));
-    }
+    void set(const std::shared_ptr<cv::Mat>& image)
+    {	
+	    if (image) set(qpixmap(*image));
+    }	    
 
     bool editable() const { return !pixmap.isNull(); }
 
@@ -106,7 +92,7 @@ public:
 
     void mousePressEvent(QMouseEvent *event)
     {
-	if ((!pixmap.isNull()) && (0.001f*float(event->timestamp() - lastMouseMovementEvent)>=mouseMovementEventPeriod)) {
+	if (!pixmap.isNull()) {
 		this->updatePositionFromMouse(event->x(), event->y());
         	emit mousePixelDown(_x, _y, event);
 		emit mousePixelChanged(_x, _y);
@@ -116,7 +102,7 @@ public:
     
     void mouseReleaseEvent(QMouseEvent *event)
     {
-	if ((!pixmap.isNull()) && (0.001f*float(event->timestamp() - lastMouseMovementEvent)>=mouseMovementEventPeriod)) {
+	if (!pixmap.isNull()) {
 		this->updatePositionFromMouse(event->x(), event->y());
 		emit mousePixelChanged(_x, _y);
         	emit mousePixelUp(_x, _y, event);
