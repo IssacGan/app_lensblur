@@ -96,7 +96,6 @@ public:
 		this->updatePositionFromMouse(event->x(), event->y());
         	emit mousePixelDown(_x, _y, event);
 		emit mousePixelChanged(_x, _y);
-		lastMouseMovementEvent=event->timestamp();
 	} 
     }
     
@@ -106,7 +105,6 @@ public:
 		this->updatePositionFromMouse(event->x(), event->y());
 		emit mousePixelChanged(_x, _y);
         	emit mousePixelUp(_x, _y, event);
-		lastMouseMovementEvent=event->timestamp();
 	}
     }	
 

@@ -57,7 +57,7 @@ public:
 	std::vector<std::tuple<std::string, float, float>> floatValues() const override
        	{    
 		return std::vector<std::tuple<std::string, float, float>>{{
-			std::make_tuple(std::string("Exposure"),0.0f,3.0f)
+			std::make_tuple(std::string("Exposure"),0.01,1.5)
 		}};    
 	}
 
@@ -68,7 +68,10 @@ public:
 		auto  expectedlum   = propagated_values[0];
 		float exposure  = float_values[0];
         
-        	return tonemap(input_image, *expectedlum, 0.18, 3.5 - exposure);
+		double min, max;
+		cv::minMaxLoc(input_image, &min, &max);
+
+        	return tonemap(input_image, *expectedlum, 0.18, (1.51 - exposure)*max);
 	}
 
 };

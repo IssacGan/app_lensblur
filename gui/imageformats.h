@@ -67,14 +67,20 @@ inline std::shared_ptr<cv::Mat> load_image(const char* filename)
 inline QPixmap qpixmap(const cv::Mat& im) {
 	if (im.channels()>=3) {
 		cv::Mat image;
-		double min, max;
-		cv::minMaxLoc(im, &min, &max);
-		cv::cvtColor(im,image,CV_BGR2RGB);
-		if (max>255.0)
-			image*=(255.0/max);
+		if (im.type()==CV_32FC3) { //If this is an HDR image we have to convert it to a 8 bit format
+			double min, max;
+			cv::minMaxLoc(im, &min, &max);
+			im.convertTo(image,CV_8UC3, 255.0/max);
+			cv::cvtColor(image,image,CV_BGR2RGB);
+		} else {
+			cv::cvtColor(im, image, CV_BGR2RGB);
+		}
+
 		return QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888)); 
 	} else {
-		cv::Mat image = im * 255.0;
+		double min, max;
+		cv::minMaxLoc(im, &min, &max);
+		cv::Mat image = im * (255.0/max);
         	image.convertTo(image,CV_8UC1);
 		return QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_Grayscale8)); 
 	}

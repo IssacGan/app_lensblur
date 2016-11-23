@@ -121,7 +121,7 @@ public:
 	        sliderValue->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	        sliderValue->setTickPosition(QSlider::TicksAbove);
         	sliderValue->setTickInterval(10);
-        	sliderValue->setRange(1,100);
+        	sliderValue->setRange(0,100);
         	sliderValue->setValue(50);
         	sliderValue->setEnabled(true);
 		sliderValue->setTracking(false);
@@ -308,7 +308,7 @@ public:
 		{
 			float min, max; std::string name;
 			std::tie(name,min,max) = filter.floatValues()[i];
-			floatValues[i]=float(sliderValues[i]->value())*(max-min) + min;
+			floatValues[i]=(float(sliderValues[i]->value())*(max-min) + min)/100.0f;
 		}
 		
 		*filtered_image = filter.apply(*input_image, propagated_channels, floatValues);
