@@ -1,9 +1,9 @@
 #ifndef SUPERPIXELS_H
 #define SUPERPIXELS_H
 
-#include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
+//#include <stdio.h>
+//#include <sys/stat.h>
+//#include <unistd.h>
 
 //Opencv
 #include "opencv2/core/core.hpp"
@@ -187,7 +187,7 @@ public:
      *      else SLIC & save TAM_SP.sp
      *
      */
-    SuperPixels(string path)
+    SuperPixels(std::string path)
     {
         clock_t start = clock();
         maxID=0;

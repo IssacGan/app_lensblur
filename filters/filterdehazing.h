@@ -2,7 +2,7 @@
 
 #include "filter.h"
 
-class FilterDehazing {
+class FilterDehazing : public Filter {
 	static cv::Mat dehaze(const cv::Mat& image, const cv::Mat& transmittance, double min, double max)
 	{
 	    std::chrono::time_point<std::chrono::system_clock> start;
@@ -29,7 +29,7 @@ class FilterDehazing {
 	}
 
 public:
-	std::vector<std::string> propagatedValues() const
+	std::vector<std::string> propagatedValues() const override
        	{    
 		return std::vector<std::string>{{
 			std::string("Transmittance")
@@ -37,7 +37,7 @@ public:
 	
 	}
 
-	virtustd::vector<std::tuple<std::string, float, float>> floatValues() const
+	std::vector<std::tuple<std::string, float, float>> floatValues() const override
        	{    
 		return std::vector<std::tuple<std::string, float, float>>{{
 			std::make_tuple(std::string("Effect"),0.0f,1.0f)
@@ -46,7 +46,7 @@ public:
 
 	cv::Mat apply(const cv::Mat& input_image, 
 			const std::vector<std::shared_ptr<cv::Mat>>& propagated_values,
-			const std::vector<float>& float_values) const
+			const std::vector<float>& float_values) const override
 	{	
 		auto  transmittance = propagated_values[0];
 		float intensity     = float_values[0];
@@ -59,4 +59,4 @@ public:
         	return dehaze(input_image, *transmittance, min_t, max_t);
 	}
 
-}
+};

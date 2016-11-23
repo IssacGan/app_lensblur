@@ -17,4 +17,4 @@ public:
 			const std::vector<std::shared_ptr<cv::Mat>>& propagated_values,
 			const std::vector<float>& float_values) const = 0;
 
-}
+};

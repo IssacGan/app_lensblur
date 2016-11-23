@@ -112,14 +112,36 @@ endif()
   include_directories(libs)
   include_directories(libs/lib_slic)
   include_directories(superpixels)  
-  include_directories(denseLabeling)  
+  include_directories(denseLabeling)
+
+  ##################################################################################
+  #     setting variables for source code and libs
+  ##################################################################################
+  set(GUI_SRCS 
+	${app_image_editing_SOURCE_DIR}/gui/labelimage.h 
+	${app_image_editing_SOURCE_DIR}/gui/imagemousebrush.h 
+	${app_image_editing_SOURCE_DIR}/gui/multiimageviewer.h 
+	${app_image_editing_SOURCE_DIR}/gui/widgetfilter.h
+	${app_image_editing_SOURCE_DIR}/gui/windowfilter.h
+	${app_image_editing_SOURCE_DIR}/libs/imageHDR.cpp
+  )
+
+  set(GUI_LIBS Qt5::Gui Qt5::Core Qt5::Widgets) 
+
+  set(SUPERPIXELS_SRCS
+	${app_image_editing_SOURCE_DIR}/superpixels/superpixel.cpp
+	${app_image_editing_SOURCE_DIR}/superpixels/superpixels.cpp
+	${app_image_editing_SOURCE_DIR}/superpixels/labelSet.cpp
+	${app_image_editing_SOURCE_DIR}/denseLabeling/denseLabeling.cpp
+	${app_image_editing_SOURCE_DIR}/libs/lib_slic/SLIC.cpp
+  )
 
   ##################################################################################
   #     src
   ##################################################################################
-  add_subdirectory(src/dehaz)
-  add_subdirectory(src/dof)
-  add_subdirectory(src/tonemapping)
+  add_subdirectory(apps/dehazing)
+  add_subdirectory(apps/depthoffield)
+  add_subdirectory(apps/tonemapping)
   add_subdirectory(superpixels)
   add_subdirectory(denseLabeling)
 
