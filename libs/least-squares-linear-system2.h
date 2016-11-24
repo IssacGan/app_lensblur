@@ -45,6 +45,8 @@ public:
 		}
 	}
 
+	void clear() { A.fill(real(0)); B.fill(real(0)); }
+
 	template<typename r2>
 	void add_equation(const DenseEquation<r2>& equation)
 	{

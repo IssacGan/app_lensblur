@@ -108,40 +108,40 @@ endif()
   #     paths: include and lib
   ##################################################################################
 
-  include_directories(${app_image_editing_SOURCE_DIR})
-  include_directories(libs)
-  include_directories(libs/lib_slic)
-  include_directories(superpixels)  
-  include_directories(denseLabeling)
+  include_directories(${app_image_editing_SOURCE_DIR}/src)
+  include_directories(${app_image_editing_SOURCE_DIR}/libs)
+  include_directories(${app_image_editing_SOURCE_DIR}/lib_slic)
+  include_directories(${app_image_editing_SOURCE_DIR}/src/superpixels)
+  include_directories(${app_image_editing_SOURCE_DIR}/src/denseLabeling)
 
   ##################################################################################
   #     setting variables for source code and libs
   ##################################################################################
   set(GUI_SRCS 
-	${app_image_editing_SOURCE_DIR}/gui/labelimage.h 
-	${app_image_editing_SOURCE_DIR}/gui/imagemousebrush.h 
-	${app_image_editing_SOURCE_DIR}/gui/multiimageviewer.h 
-	${app_image_editing_SOURCE_DIR}/gui/widgetfilter.h
-	${app_image_editing_SOURCE_DIR}/gui/windowfilter.h
+	${app_image_editing_SOURCE_DIR}/src/gui/labelimage.h 
+	${app_image_editing_SOURCE_DIR}/src/gui/imagemousebrush.h 
+	${app_image_editing_SOURCE_DIR}/src/gui/multiimageviewer.h 
+	${app_image_editing_SOURCE_DIR}/src/gui/widgetfilter.h
+	${app_image_editing_SOURCE_DIR}/src/gui/windowfilter.h
 	${app_image_editing_SOURCE_DIR}/libs/imageHDR.cpp
   )
 
   set(GUI_LIBS Qt5::Gui Qt5::Core Qt5::Widgets) 
 
   set(SUPERPIXELS_SRCS
-	${app_image_editing_SOURCE_DIR}/superpixels/superpixel.cpp
-	${app_image_editing_SOURCE_DIR}/superpixels/superpixels.cpp
-	${app_image_editing_SOURCE_DIR}/superpixels/labelSet.cpp
-	${app_image_editing_SOURCE_DIR}/denseLabeling/denseLabeling.cpp
+	${app_image_editing_SOURCE_DIR}/src/superpixels/superpixel.cpp
+	${app_image_editing_SOURCE_DIR}/src/superpixels/superpixels.cpp
+	${app_image_editing_SOURCE_DIR}/src/superpixels/labelSet.cpp
+	${app_image_editing_SOURCE_DIR}/src/denseLabeling/denseLabeling.cpp
 	${app_image_editing_SOURCE_DIR}/libs/lib_slic/SLIC.cpp
   )
 
   ##################################################################################
   #     src
   ##################################################################################
-  add_subdirectory(apps/dehazing)
-  add_subdirectory(apps/depthoffield)
-  add_subdirectory(apps/tonemapping)
-  add_subdirectory(superpixels)
-  add_subdirectory(denseLabeling)
+  add_subdirectory(src/apps/dehazing)
+  add_subdirectory(src/apps/depthoffield)
+  add_subdirectory(src/apps/tonemapping)
+  add_subdirectory(src/superpixels)
+  add_subdirectory(src/denseLabeling)
 
