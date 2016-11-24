@@ -70,7 +70,9 @@ inline QPixmap qpixmap(const cv::Mat& im) {
 		if (im.type()==CV_32FC3) { //If this is an HDR image we have to convert it to a 8 bit format
 			double min, max;
 			cv::minMaxLoc(im, &min, &max);
-			im.convertTo(image,CV_8UC3, 255.0/max);
+			cv::Scalar avg = cv::mean(im);
+			double mid = (avg.val[0] + avg.val[1] + avg.val[2])/3.0;
+			im.convertTo(image,CV_8UC3, 255.0/(0.5*(mid + max)));
 			cv::cvtColor(image,image,CV_BGR2RGB);
 		} else {
 			cv::cvtColor(im, image, CV_BGR2RGB);

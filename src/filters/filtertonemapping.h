@@ -29,7 +29,7 @@ static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, double a, do
     
     cv::Mat al = (a/log_mean)*luminance;
     cv::Mat lw;
-    cv::exp(factor_effect*(factor - cv::Scalar(0.5,0.5,0.5)), lw);
+    cv::exp(-factor_effect*(factor - cv::Scalar(0.5,0.5,0.5)), lw);
     lw*=lw_;
     cv::Mat lw2;
     cv::multiply(lw, lw, lw2, 1, CV_32F);

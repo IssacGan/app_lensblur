@@ -222,8 +222,7 @@ public:
     {
 	    load_image(filename.toStdString().c_str(), input_image);
 	    imageMouseBrush->clear();
-	    *filtered_image = *input_image;
-
+	    for (int i = 0; i < edited.size(); ++i) edited[i] = false;
             //mostrar imagen en la interfaz
 	    multiImageViewer->setButton(buttonIdInput);
 //            imageToEdit->set(input_image);
