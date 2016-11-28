@@ -14,15 +14,11 @@ static void print_info(const char* name, const cv::Mat& image)
 
 	static cv::Mat dehaze(const cv::Mat& image, const cv::Mat& transmittance, double min, double max)
 	{
-		print_info("Image",image);
-		print_info("Transmittance",transmittance);
 	    cv::Mat colored_transmittance;
 	    cv::normalize(transmittance, colored_transmittance, min*255.0, max*255.0, cv::NORM_MINMAX, -1);
 	    cv::Mat1b atmosphere_mask  = (colored_transmittance <= 255.0*(min + 0.1*(max-min)));
 	    cv::Scalar atmosphere = cv::mean(image, atmosphere_mask);
 	    atmosphere/=255.0f;
-	    
-		print_info("C. Transmittance",colored_transmittance);
 	    cv::cvtColor(colored_transmittance, colored_transmittance, CV_GRAY2RGB);
 	    cv::Mat num;
 	    cv::multiply(atmosphere, (colored_transmittance*(-1.0) + cv::Scalar(255.0,255.0,255.0)), num  , 1, CV_32FC3);
