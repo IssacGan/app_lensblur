@@ -22,6 +22,15 @@ cd build
 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
+Note that in OS X and Windows you will probably need to add the path to wherever QT5 is installed when running cmake, for example:
+```
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.5.1_2/ ..
+```
+some typical places where you may have qt5 installed:
+OS X (if installed with homebrew): /usr/local/Cellar/qt5/5.*.*/
+OS X (if installed Qt's official package): ~/Qt5.*.*/5.*.*/clang_64/
+Windows (if installed from Qt's official package with mingw): c:\Qt\5.*.*\mingw482_32\
+
 
 This will compile all the aps and store the executable files in `app_lensblur/bin`. In order to execute them please you can either set that folder as part of the `PATH` environment variable, or move to the folder and execute there. None of the three  
 
