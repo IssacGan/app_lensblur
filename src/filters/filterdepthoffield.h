@@ -126,8 +126,8 @@ public:
 	std::vector<FloatValue> floatValues() const override
        	{    
 		return std::vector<FloatValue>{{
-			FloatValue("Focal distance",0.0f,1.0f,0),
-			FloatValue("Aperture",0.0f,4.0f)
+			FloatValue("Focal depth",0.0f,1.0f,0),
+			FloatValue("Aperture",   0.0f,4.0f)
 		}};    
 	}
 
@@ -141,7 +141,7 @@ public:
 
 		float focal_length = focal_distance + 20;
 
-		return blur_image_depth(input_image, *depth, 8, 1.0f - focal_distance, focal_length, aperture, true);	
+		return blur_image_depth(input_image, *depth, 6, focal_distance, focal_length, aperture, true);	
 	}
 
 };

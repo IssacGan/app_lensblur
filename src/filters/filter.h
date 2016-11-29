@@ -29,8 +29,8 @@ public:
 		const std::string name() const { return _name; }
 		float min() const { return _min; }
 		float max() const { return _max; }
-		bool is_pickable() const { return _pickable_from_channel >= 0; }
-		int  channel_to_pick_from() const { return _pickable_from_channel; }
+		bool isPickable() const { return _pickable_from_channel >= 0; }
+		int  channelToPickFrom() const { return _pickable_from_channel; }
 	};
 
 	virtual std::vector<std::string> propagatedValues() const

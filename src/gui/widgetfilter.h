@@ -14,6 +14,58 @@
 #include "denseLabeling.cpp"
 #include "imageHDR.h"
 
+    const int slider_ticks = 1000;
+
+class Brush {
+	
+public:
+	virtual void onClicked(int x, int y) { };
+	virtual void onMoved(int x, int y)   { };
+	virtual bool shouldDrawStroke() const { return false; }
+};
+
+class BrushEditChannel : public Brush
+{
+	const std::vector<DenseLabeling*>& labels;
+	std::vector<bool>& edited;
+	float value;
+	int channel;
+public:
+	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
+			std::vector<bool>& _edited, float _value, float _channel) : 
+		labels(_labels), edited(_edited), value(_value), channel(_channel) { }
+
+	void onClicked(int x, int y) override {
+	    if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
+	    	edited[channel] = true;
+		labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
+	    }
+	}
+
+	void onMoved(int x, int y) override { //This event also happens when clicking.
+	    labels[channel]->addEquation_Unary(x,y,value);
+	}
+
+	bool shouldDrawStroke() const override { return true; }
+};
+
+class BrushPickValue : public Brush
+{
+	std::shared_ptr<cv::Mat> from;
+	QSlider* slider;
+	float min, max;
+public:
+	BrushPickValue(const std::shared_ptr<cv::Mat>& _from, QSlider* _slider, float _min, float _max) :
+		from(_from), slider(_slider), min(_min), max(_max) { }
+
+	void onMoved(int x, int y) override { //This event also happens when clicking.
+		if (from && slider && (x>=0) && (x<from->cols) && (y>=0) && (y<from->rows))
+		{
+			float v = from->at<float>(y,x,0);
+			slider->setValue(int(float(slider_ticks)*(v-min)/(max-min)));
+		}
+	}
+};
 
 class WidgetFilter : public QWidget
 {
@@ -43,22 +95,23 @@ private:
             double _minFocus = 220, _maxFocus=0.0;
             double _sizeFocus = 50.0;
 
-            float brush = 255.0;
-	    float brushChannel = 0;
-	    DenseLabeling* activeLabeling = NULL;
-	    std::vector<float> brushValues;
-	    std::vector<int> brushChannels; 
    	    int button_id; 
 
 	    std::vector<QSlider*> sliderValues;
 
+	    std::vector<std::shared_ptr<Brush>> brushes;
+	    std::shared_ptr<Brush> activeBrush;
+
     void chooseButton(int id)
     {
-	    imageMouseBrush->setColorBrush(QColor::fromHsv((100*id)%360, 255, 255));
-            this->setCursor(Qt::PointingHandCursor);
-	    brush = brushValues[id];
-	    brushChannel = brushChannels[id];
-	    activeLabeling = labels[brushChannel];
+	    if ((id>=0) && (id<brushes.size())) {
+            	    this->setCursor(Qt::PointingHandCursor); //Maybe have a look at the cursors somewhen
+		    activeBrush=brushes[id];
+		    if (activeBrush->shouldDrawStroke())
+	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*id)%360, 255, 255));
+		    else
+			    imageMouseBrush->unsetBrush();
+	    }
     }
 
     void updateSlider(int size)
@@ -69,17 +122,15 @@ private:
     std::vector<bool> edited;
 
 public:
-    const int slider_ticks = 1000;
 
     	int addBrush(const char* name, float value, int channel=0)
     	{
 		QPushButton* button = new QPushButton(QString(name));
-	        button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 		button->setCheckable(true);
 		buttonLayout->addWidget(button);
 		buttonOptions->addButton(button, button_id);
-		brushValues.push_back(value);
-		brushChannels.push_back(channel);
+		brushes.push_back(std::make_shared<BrushEditChannel>(labels, edited, value, channel));
 		if (button_id == 0) {
 			button->setChecked(true);
 			chooseButton(0);
@@ -109,7 +160,6 @@ public:
        
         sideBar->addWidget(brushBox);
 
-
         QVBoxLayout *sliderLayout = new QVBoxLayout();
         QGroupBox *sliderBox = new QGroupBox(tr("Parameters"));
 	sliderBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -127,7 +177,16 @@ public:
 //      	sliderFocus->setFixedSize(180,20);
 		sliderValues.push_back(sliderValue);
         	sliderLayout->addWidget(sliderValue);
-		QObject::connect(sliderValue,&QSlider::valueChanged,this,&WidgetFilter::updateSlider);  
+		QObject::connect(sliderValue,&QSlider::valueChanged,this,&WidgetFilter::updateSlider);
+
+	        if (fv.isPickable()) {
+			QPushButton* button = new QPushButton(QString("^ Pick ^"));
+	        	button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+			button->setCheckable(true);
+			sliderLayout->addWidget(button);
+			buttonOptions->addButton(button, button_id++);
+			brushes.push_back(std::make_shared<BrushPickValue>(propagated_channels[fv.channelToPickFrom()],sliderValue, fv.min(), fv.max()));
+		}	
 	}
 	sliderBox->setLayout(sliderLayout);
 	sideBar->addWidget(sliderBox);
@@ -230,7 +289,6 @@ public:
 	            d->addEquations_BinariesBoundariesPerPixelMean();
 		    d->addEquation_Unary(0,0,0.5f);
 	    }
-	    activeLabeling = labels[0];
 	    solveAll();
 	    *filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
  
@@ -255,9 +313,9 @@ private:
     {
         if (input_image)
         {
-            setInfo("Add new unary equation");
-	    activeLabeling->addEquation_Unary(x,y,brush);
-	    multiImageViewer->setButton(buttonIdStrokes);
+		activeBrush->onMoved(x,y);
+		if (activeBrush->shouldDrawStroke()) 
+	    		multiImageViewer->setButton(buttonIdStrokes);
         }
     }
     
@@ -267,14 +325,7 @@ private:
         {
             if (input_image)
             {
-		    if (!edited[brushChannel]) {
-		    	edited[brushChannel] = true;
-			activeLabeling->clearUnaries(); //We remove the initial equation that sets up the entire thing.
-	            }
-			
-		    setInfo("Add new unary equation");
-		    activeLabeling->addEquation_Unary(x,y,brush);
-		    multiImageViewer->setButton(buttonIdStrokes);
+		    activeBrush->onClicked(x,y);
             }
         }
 	else if (event->button() == Qt::RightButton)
