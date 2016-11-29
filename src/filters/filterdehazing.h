@@ -3,15 +3,6 @@
 #include "filter.h"
 
 class FilterDehazing : public Filter {
-static void print_info(const char* name, const cv::Mat& image) 
-{
-	double min, max;
-	cv::minMaxLoc(image, &min, &max);
-
-	std::cerr<<std::setw(20)<<name<<"\t- "<<image.cols<<"x"<<image.rows<<"x"<<image.channels()<<" - ["<<min<<","<<max<<"]"<<std::endl;
-}
-
-
 	static cv::Mat dehaze(const cv::Mat& image, const cv::Mat& transmittance, double min, double max)
 	{
 	    cv::Mat colored_transmittance;
@@ -41,10 +32,10 @@ public:
 	
 	}
 
-	std::vector<std::tuple<std::string, float, float>> floatValues() const override
+	std::vector<FloatValue> floatValues() const override
        	{    
-		return std::vector<std::tuple<std::string, float, float>>{{
-			std::make_tuple(std::string("Effect"),0.0f,1.0f)
+		return std::vector<FloatValue>{{
+			FloatValue("Effect",0.0f,1.0f)
 		}};    
 	}
 

@@ -47,7 +47,7 @@ private:
 	    float brushChannel = 0;
 	    DenseLabeling* activeLabeling = NULL;
 	    std::vector<float> brushValues;
-	    std::vector<int> brushChannels;
+	    std::vector<int> brushChannels; 
    	    int button_id; 
 
 	    std::vector<QSlider*> sliderValues;
@@ -69,6 +69,7 @@ private:
     std::vector<bool> edited;
 
 public:
+    const int slider_ticks = 1000;
 
     	int addBrush(const char* name, float value, int channel=0)
     	{
@@ -106,26 +107,21 @@ public:
 	    brushBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	    brushBox->setLayout(buttonLayout);
        
-        QSlider* sliderFocus;
-        sliderFocus = new QSlider(Qt::Horizontal);
-        
         sideBar->addWidget(brushBox);
 
 
         QVBoxLayout *sliderLayout = new QVBoxLayout();
         QGroupBox *sliderBox = new QGroupBox(tr("Parameters"));
 	sliderBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	for (auto v : filter.floatValues()) {
-		float min, max; std::string name;
-		std::tie(name,min,max) = v;
-		QLabel* labelValue = new QLabel(name.c_str());
+	for (auto fv : filter.floatValues()) {
+		QLabel* labelValue = new QLabel(fv.name().c_str());
 		sliderLayout->addWidget(labelValue);
 		QSlider* sliderValue = new QSlider(Qt::Horizontal);
 	        sliderValue->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	        sliderValue->setTickPosition(QSlider::TicksAbove);
-        	sliderValue->setTickInterval(10);
-        	sliderValue->setRange(0,100);
-        	sliderValue->setValue(50);
+        	sliderValue->setTickInterval(slider_ticks/10);
+        	sliderValue->setRange(0,slider_ticks);
+        	sliderValue->setValue(slider_ticks/2);
         	sliderValue->setEnabled(true);
 		sliderValue->setTracking(false);
 //      	sliderFocus->setFixedSize(180,20);
@@ -208,9 +204,9 @@ private:
 		std::vector<float> floatValues(sliderValues.size());
 		for (int i = 0; i<sliderValues.size(); ++i)
 		{
-			float min, max; std::string name;
-			std::tie(name,min,max) = filter.floatValues()[i];
-			floatValues[i]=(float(sliderValues[i]->value())*(max-min) + min)/100.0f;
+			float min = filter.floatValues()[i].min();
+			float max = filter.floatValues()[i].max(); 
+			floatValues[i]=(float(sliderValues[i]->value())*(max-min) + min)/float(slider_ticks);
 		}
 		return floatValues;
     }
@@ -260,7 +256,7 @@ private:
         if (input_image)
         {
             setInfo("Add new unary equation");
-	    activeLabeling->addEquation_Unary(x,y,brush/255.0);
+	    activeLabeling->addEquation_Unary(x,y,brush);
 	    multiImageViewer->setButton(buttonIdStrokes);
         }
     }
@@ -277,7 +273,7 @@ private:
 	            }
 			
 		    setInfo("Add new unary equation");
-		    activeLabeling->addEquation_Unary(x,y,brush/255.0);
+		    activeLabeling->addEquation_Unary(x,y,brush);
 		    multiImageViewer->setButton(buttonIdStrokes);
             }
         }

@@ -56,8 +56,9 @@ static cv::Mat blur_image_depth(const cv::Mat& image, const cv::Mat& depth,
         
 //	std::chrono::time_point<std::chrono::system_clock> start;
 //        start = std::chrono::system_clock::now();
+
         cv::Mat sol;
-        float ddepth = 255.0f/float(nbins);
+        float ddepth = 1.0f/float(nbins);
 	cv::Mat acc_mask;
 	for (int i = 0; i<nbins;++i)
 	{
@@ -68,14 +69,13 @@ static cv::Mat blur_image_depth(const cv::Mat& image, const cv::Mat& depth,
 		mask.convertTo(mask, CV_32F, 1.0f/255.0f);
 		double blur = blur_size_from_distance((float(nbins - i - 1) + 0.5f)*ddepth,
 				focal_distance, focal_length, aperture, linear);
-		int blur_size = int(blur);
+		int blur_size = int(0.5*blur*float(image.cols));
 		if (blur_size >= 1) {
 			if ((blur_size % 2) == 0) ++blur_size;
  			cv::GaussianBlur(masked, masked, cv::Size(blur_size,blur_size), 0);
  			cv::GaussianBlur(mask,     mask, cv::Size(blur_size,blur_size), 0);
 		}
-		//std::cout<<"Layer "<<i<<" - Depth "<<((float(nbins - i - 1) + 0.5f)*ddepth)<<
-		//			" - Blur "<<blur_size<<std::endl;
+
 		if (i == 0) {
 			sol = masked.clone();
 			acc_mask  = mask*(-1.0f) + cv::Scalar(1.0f,1.0f,1.0f); 
@@ -123,11 +123,11 @@ public:
 	
 	}
 
-	std::vector<std::tuple<std::string, float, float>> floatValues() const override
+	std::vector<FloatValue> floatValues() const override
        	{    
-		return std::vector<std::tuple<std::string, float, float>>{{
-			std::make_tuple(std::string("Focal distance"),0.0f,255.0f),
-			std::make_tuple(std::string("Aperture"),0.0f,100.0f)
+		return std::vector<FloatValue>{{
+			FloatValue("Focal distance",0.0f,1.0f,0),
+			FloatValue("Aperture",0.0f,4.0f)
 		}};    
 	}
 
@@ -141,7 +141,7 @@ public:
 
 		float focal_length = focal_distance + 20;
 
-		return blur_image_depth(input_image, *depth, 8, focal_distance, focal_length, aperture, true);	
+		return blur_image_depth(input_image, *depth, 8, 1.0f - focal_distance, focal_length, aperture, true);	
 	}
 
 };

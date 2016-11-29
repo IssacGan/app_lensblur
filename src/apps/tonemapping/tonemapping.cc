@@ -9,9 +9,9 @@
      
      FilterTonemapping filter;
      WindowFilter window(filter);
-     window.addBrush("Darken",          15.0);
-     window.addBrush("Preserve light", 127.0);
-     window.addBrush("Light up",       255.0);
+     window.addBrush("Darken",          0.05);
+     window.addBrush("Preserve light",  0.5);
+     window.addBrush("Light up",        1.0);
      window.show();
 
      return app.exec();

@@ -60,11 +60,11 @@ public:
 	
 	}
 
-	std::vector<std::tuple<std::string, float, float>> floatValues() const override
+	std::vector<FloatValue> floatValues() const override
        	{    
-		return std::vector<std::tuple<std::string, float, float>>{{
-			std::make_tuple(std::string("Exposure"),-4.5,2.5),
-			std::make_tuple(std::string("Local effect"),0.0,5.0)
+		return std::vector<FloatValue>{{
+			FloatValue("Exposure",-4.5f,2.5f),
+			FloatValue("Local effect",0.0f,5.0f)
 		}};    
 	}
 
