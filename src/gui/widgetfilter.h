@@ -366,8 +366,13 @@ private:
     
     void processImage(bool save=false, string dir = "")
     {
+    	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	solveAll();
 	*filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
+	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+	std::stringstream sstr;
+	sstr<<"Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
+	setInfo(sstr.str().c_str());
 	multiImageViewer->setButton(buttonIdFiltered);
     }
 };
