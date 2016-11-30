@@ -68,6 +68,17 @@ public:
 		}};    
 	}
 
+	std::vector<Stroke> strokes() const override
+       	{    
+		return std::vector<Stroke>{{
+			Stroke("Darken",         0.05),
+			Stroke("Preserve light", 0.50),
+			Stroke("Light up",       1.00)
+		}};		
+	}
+
+
+
 	cv::Mat apply(const cv::Mat& input_image, 
 			const std::vector<std::shared_ptr<cv::Mat>>& propagated_values,
 			const std::vector<float>& float_values) const override

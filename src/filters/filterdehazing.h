@@ -38,6 +38,18 @@ public:
 			FloatValue("Effect",0.0f,1.0f)
 		}};    
 	}
+	
+	std::vector<Stroke> strokes() const override
+       	{    
+		return std::vector<Stroke>{{
+			Stroke("Maximum fog", 0.25),
+			Stroke("Medium fog",  0.50),
+			Stroke("Minimum fog", 0.75),
+			Stroke("No fog",      1.00)
+		}};		
+	}
+
+
 
 	cv::Mat apply(const cv::Mat& input_image, 
 			const std::vector<std::shared_ptr<cv::Mat>>& propagated_values,

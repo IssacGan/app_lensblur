@@ -14,10 +14,6 @@
      
      FilterDehazing filter;
      WindowFilter window(filter);
-     window.addBrush("Maximum fog",  0.25);
-     window.addBrush("Medium fog",   0.5);
-     window.addBrush("Minimum fog",  0.75);
-     window.addBrush("No fog",       1.0);
      window.show();
 
      return app.exec();

@@ -28,22 +28,32 @@ class BrushEditChannel : public Brush
 {
 	const std::vector<DenseLabeling*>& labels;
 	std::vector<bool>& edited;
-	float value;
-	int channel;
+	std::list<std::tuple<float, int>> values;
 public:
 	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
+			std::vector<bool>& _edited, const std::list<std::tuple<float, int>> _values) :
+	       labels(_labels), edited(_edited), values(_values) { }
+	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
 			std::vector<bool>& _edited, float _value, float _channel) : 
-		labels(_labels), edited(_edited), value(_value), channel(_channel) { }
+		BrushEditChannel(_labels, _edited, std::list<std::tuple<float,int>>{{std::make_tuple(_value, _channel)}}) { }
 
 	void onClicked(int x, int y) override {
-	    if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
-	    	edited[channel] = true;
-		labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
-	    }
+		for (auto t : values) {
+			float value; int channel;
+			std::tie(value, channel) = t;
+	    		if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
+	    			edited[channel] = true;
+				labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
+	    		}
+		}
 	}
 
 	void onMoved(int x, int y) override { //This event also happens when clicking.
-	    labels[channel]->addEquation_Unary(x,y,value);
+		for (auto t : values) {
+			float value; int channel;
+			std::tie(value, channel) = t;
+	    		labels[channel]->addEquation_Unary(x,y,value);
+		}
 	}
 
 	bool shouldDrawStroke() const override { return true; }
@@ -90,11 +100,7 @@ private:
     
             //Datos
 	    std::vector<DenseLabeling*> labels;
-    
-            //valor de profundidad
-            double _minFocus = 220, _maxFocus=0.0;
-            double _sizeFocus = 50.0;
-
+   
    	    int button_id; 
 
 	    std::vector<QSlider*> sliderValues;
@@ -116,7 +122,7 @@ private:
 
     void updateSlider(int size)
     {
-        processImage();
+	if ((input_image) && (!input_image->empty())) processImage();
     }
 
     std::vector<bool> edited;
@@ -198,7 +204,21 @@ public:
         
         QVBoxLayout *image = new QVBoxLayout;
         image->addWidget(multiImageViewer);
-        
+       
+        //BUTTONS FOR STORKES	
+	for (auto stroke : filter.strokes()) {
+		QPushButton* button = new QPushButton(QString(stroke.name().c_str()));
+	        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		button->setCheckable(true);
+		buttonLayout->addWidget(button);
+		buttonOptions->addButton(button, button_id);
+		brushes.push_back(std::make_shared<BrushEditChannel>(labels, edited, stroke.values()));
+		if (button_id == 0) {
+			button->setChecked(true);
+			chooseButton(0);
+		}
+		button_id++;
+	}
         
         //add label de info
         info->setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -241,16 +261,7 @@ public:
     {
 	    if ((input_image) && (!input_image->empty())) processImage();
     }
-   
-    void resetOptions()
-    {
-        this->setCursor(Qt::ArrowCursor);
-        _minFocus = 250.0;
-        _maxFocus = 255.0;
-        destroyAllWindows();
-        //buttonOptions->resetSelection();
-    }
-    
+      
 private:
     void solveAll() {
 	for (int i = 0; i<labels.size();++i)
@@ -285,6 +296,7 @@ public:
 //
 
 	    for (DenseLabeling*& d : labels) { 
+		    if (d) delete d;
 		    d = new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
 	            d->addEquations_BinariesBoundariesPerPixelMean();
 		    d->addEquation_Unary(0,0,0.5f);
@@ -347,31 +359,18 @@ private:
         processImage();
     }
 
-
-
-/*    
-    void updateFocus(int x, int y)
-    {
-        double newDepth = denseDepth->getLabel(x,y) * 255.0;
-        
-        //if (newDepth < _minFocus)
-            _minFocus = newDepth;
-       // if (newDepth > _maxFocus)
-         //   _maxFocus = newDepth;
-        
-         //fprintf(stderr,"_min: %f max: %f new: %f",_minFocus,_maxFocus,newDepth);
-    }
-*/
-
     
     void processImage(bool save=false, string dir = "")
     {
+	std::stringstream sstr;
     	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 	solveAll();
-	*filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
 	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
-	std::stringstream sstr;
-	sstr<<"Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
+	sstr<<"Propagation: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
+    	start = std::chrono::system_clock::now();
+	*filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
+	elapsed_seconds = std::chrono::system_clock::now() - start;
+	sstr<<"        Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
 	setInfo(sstr.str().c_str());
 	multiImageViewer->setButton(buttonIdFiltered);
     }

@@ -131,6 +131,18 @@ public:
 		}};    
 	}
 
+
+	std::vector<Stroke> strokes() const override
+       	{    
+		return std::vector<Stroke>{{
+			Stroke("Furthest", 0.01),
+			Stroke("Far",      0.34),
+			Stroke("Close",    0.67),
+			Stroke("Near",     1.00)
+		}};		
+	}
+
+
 	cv::Mat apply(const cv::Mat& input_image, 
 			const std::vector<std::shared_ptr<cv::Mat>>& propagated_values,
 			const std::vector<float>& float_values) const override
