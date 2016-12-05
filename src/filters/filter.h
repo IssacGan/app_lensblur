@@ -9,12 +9,35 @@
 
 class Filter {
 protected:
+	static std::string type2str(int type) {
+		std::string r;
+
+		  unsigned char depth = type & CV_MAT_DEPTH_MASK;
+		  unsigned char chans = 1 + (type >> CV_CN_SHIFT);
+
+		  switch ( depth ) {
+		    case CV_8U:  r = "8U"; break;
+		    case CV_8S:  r = "8S"; break;
+		    case CV_16U: r = "16U"; break;
+		    case CV_16S: r = "16S"; break;
+		    case CV_32S: r = "32S"; break;
+		    case CV_32F: r = "32F"; break;
+		    case CV_64F: r = "64F"; break;
+		    default:     r = "User"; break;
+		  }
+
+		  r += "C";
+		  r += (chans+'0');
+
+		  return r;
+	}
+
 	static void print_info(const char* name, const cv::Mat& image) 
 	{
 		double min, max;
 		cv::minMaxLoc(image, &min, &max);
 
-		std::cerr<<std::setw(20)<<name<<"\t- "<<image.cols<<"x"<<image.rows<<"x"<<image.channels()<<" - ["<<min<<","<<max<<"]"<<std::endl;
+		std::cerr<<std::setw(20)<<name<<" ("<<type2str(image.type())<<")\t- "<<image.cols<<"x"<<image.rows<<"x"<<image.channels()<<" - ["<<min<<","<<max<<"]"<<std::endl;
 	}
 
 public:
@@ -42,10 +65,15 @@ public:
 			_name(name), _values(values) { }
 		Stroke(const std::string& name = std::string(), float value=0.5, int channel=0) :
 			Stroke(name, std::list<std::tuple<float, int>>{{std::make_tuple(value, channel)}}) { }
+		Stroke(const std::string& name, float value1, int channel1, float value2, int channel2) :
+			Stroke(name, std::list<std::tuple<float, int>>{{
+					std::make_tuple(value1, channel1), std::make_tuple(value2, channel2) }}) { }
 		Stroke(const char* name, const std::list<std::tuple<float, int>>& values) :
 			Stroke(std::string(name), values) { }
 		Stroke(const char* name, float value, int channel=0) :
 			Stroke(std::string(name), value, channel) { }
+		Stroke(const char* name, float value1, int channel1, float value2, int channel2) :
+			Stroke(std::string(name), value1, channel1, value2, channel2) { }
 
 		const std::string& name() const { return _name; }
 		const std::list<std::tuple<float, int>>& values() const { return _values; }

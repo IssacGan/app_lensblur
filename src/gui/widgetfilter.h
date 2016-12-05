@@ -276,7 +276,7 @@ private:
 		{
 			float min = filter.floatValues()[i].min();
 			float max = filter.floatValues()[i].max(); 
-			floatValues[i]=(float(sliderValues[i]->value())*(max-min) + min)/float(slider_ticks);
+			floatValues[i]=(float(sliderValues[i]->value())/float(slider_ticks))*(max-min) + min;
 		}
 		return floatValues;
     }

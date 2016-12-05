@@ -4,14 +4,6 @@
 
 class FilterTonemapping : public Filter {
 
-static void print_info(const char* name, const cv::Mat& image) 
-{
-	double min, max;
-	cv::minMaxLoc(image, &min, &max);
-
-	std::cerr<<std::setw(20)<<name<<"\t- "<<image.cols<<"x"<<image.rows<<"x"<<image.channels()<<" - ["<<min<<","<<max<<"]"<<std::endl;
-}
-
 static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, double a, double lum_white, double factor_effect)
 {
     std::vector<cv::Mat> channels;
@@ -42,7 +34,7 @@ static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, double a, do
     cv::divide(ld,luminance, f, 1, CV_32F);
     cv::Mat sol;
     cv::cvtColor(f, f, CV_GRAY2RGB);
-    cv::multiply(f, image, sol, 1, CV_32FC3);
+    cv::multiply(f, image, sol, 255, CV_32FC3);
     cv::max(sol, cv::Scalar(0.0,0.0,0.0), sol);
     cv::min(sol, cv::Scalar(255.0,255.0,255.0), sol);
     sol.convertTo(sol, CV_8UC3);
@@ -63,7 +55,7 @@ public:
 	std::vector<FloatValue> floatValues() const override
        	{    
 		return std::vector<FloatValue>{{
-			FloatValue("Exposure",-4.5f,2.5f),
+			FloatValue("Exposure",-5.0f,5.0f),
 			FloatValue("Local effect",0.0f,5.0f)
 		}};    
 	}
@@ -90,7 +82,7 @@ public:
 		double min, max;
 		cv::minMaxLoc(input_image, &min, &max);
 
-        	return tonemap(input_image, *expectedlum, 0.18, 0.5*(max+min)*std::exp(-exposure), local_effect);
+        	return tonemap(input_image, *expectedlum, 0.18, (0.8*max+0.2*min)*std::exp(-exposure), local_effect);
 	}
 
 };
