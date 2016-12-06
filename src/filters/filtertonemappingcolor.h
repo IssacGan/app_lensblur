@@ -7,59 +7,81 @@ class FilterTonemappingColor : public Filter {
 static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, const cv::Mat& color_saturation, double a, double lum_white, double factor_effect, double color_effect)
 {
     cv::Mat sol;
-    cv::Mat image_lab;
-    cv::cvtColor(image, image_lab, CV_BGR2YCrCb);
+    cv::Mat XYZ;
+    cv::cvtColor(image, XYZ, CV_BGR2XYZ);
 
     std::vector<cv::Mat> channels;
-    cv::split(image_lab, channels);
-    cv::Mat luminance = channels[0];
+    cv::split(XYZ, channels);
+    cv::Mat& X = channels[0];
+    cv::Mat& Y = channels[1];
+    cv::Mat& Z = channels[2];
+    cv::Mat  x = X/(X+Y+Z);
+    cv::Mat  y = Y/(X+Y+Z);
+    cv::Mat  z = Z/(X+Y+Z);
+
 
     std::cerr<<"lum_white="<<lum_white<<std::endl;
     print_info("Input", image);
-    print_info("L", channels[0]); 
-    print_info("a", channels[1]); 
-    print_info("b", channels[2]); 
+    print_info("X", X); 
+    print_info("Y", Y); 
+    print_info("Z", Z);
+    print_info("x", x);
+    print_info("y", x);
+    print_info("z", z); 
     
-    cv::cvtColor(image_lab, sol, CV_YCrCb2BGR);
-    print_info("ReInput", sol);
-    double lmin, lmax;
-    cv::minMaxLoc(luminance, &lmin, &lmax);
-    double lw_ = lum_white; //lmax;
     cv::Mat log_luminance;
-    cv::log(luminance, log_luminance);
-    cv::Mat positive = luminance > 0;
-    double log_mean = std::exp(cv::mean(log_luminance, positive)[0]);
+    cv::log(Y, log_luminance);
+//    cv::Mat positive = Y > 0;
+    double log_mean = std::exp(cv::mean(log_luminance, Y > 0)[0]);
     
-    cv::Mat al = (a/log_mean)*luminance;
+    std::cerr<<"log_mean="<<log_mean<<std::endl;
+    cv::Mat al = (a/log_mean)*Y;
+    print_info("al",al);
     cv::Mat lw;
     cv::exp(-factor_effect*(factor - cv::Scalar(0.5,0.5,0.5)), lw);
-    lw*=lw_;
+    print_info("lw",lw);
     cv::Mat lw2;
-    cv::multiply(lw, lw, lw2, 1, CV_32F);
+    cv::multiply(lw, lw, lw2, lum_white*lum_white, CV_32F);
+    print_info("lw2",lw2);
     cv::Mat ld;
     cv::divide(al,lw2,ld,1,CV_32F);
+    print_info("ld",ld);
     ld = (cv::Scalar(1.0,1.0,1.0) + ld)/(cv::Scalar(1.0,1.0,1.0) + al);
-    cv::multiply(al,ld,ld,1.0,CV_32F);
-    cv::multiply(luminance, lw, luminance,1,CV_32F);
-    cv::Mat fL;
-    cv::divide(ld,luminance, fL, 1, CV_32F);
+    cv::multiply(al,ld,Y,1.0,CV_32F);
 
-    cv::Mat fab;
-    cv::exp(-color_effect*(color_saturation - cv::Scalar(0.5,0.5,0.5)), fab);
+    cv::Mat color_factor;
+    cv::exp(-color_effect*(color_saturation - cv::Scalar(0.5,0.5,0.5)), color_factor);
+    print_info("color_factor",color_factor);
+    cv::multiply(x, color_factor, x, 1, CV_32F);
+    cv::min(x, cv::Scalar(1.0), x);
+//    cv::multiply(y, color_factor, y, 1, CV_32F);
+    cv::multiply(z, color_factor, z, 1, CV_32F);
+    cv::min(z, cv::Scalar(1.0), z);
+    y = cv::Scalar(1.0,1.0,1.0) - x - z;
 
-    cv::multiply(fL,  channels[0], channels[0], 255, CV_32F);
-    cv::multiply(fab, channels[1], channels[1], 1, CV_32F);
-    cv::multiply(fab, channels[2], channels[2], 1, CV_32F);
+    print_info("x", x);
+    print_info("y", x);
+    print_info("z", z); 
+    
+    cv::Mat normalization_factor;
+
+    cv::divide(Y,y,normalization_factor, 1, CV_32F);
+    cv::multiply(x,normalization_factor,X, 1, CV_32F);
+    cv::multiply(z,normalization_factor,Z, 1, CV_32F);
+
     cv::merge(channels, sol);
 
     std::cerr<<"  vv  "<<std::endl;
-    print_info("L", channels[0]); 
-    print_info("a", channels[1]); 
-    print_info("b", channels[2]); 
-    print_info("Lab", sol);
+    print_info("X", X); 
+    print_info("Y", Y); 
+    print_info("Z", Z);
+    print_info("x", x);
+    print_info("y", x);
+    print_info("z", z); 
 
-    cv::cvtColor(sol, sol, CV_YCrCb2BGR);
+    cv::cvtColor(sol, sol, CV_XYZ2BGR);
     print_info("Output", sol);
+    sol*=255.0;
     cv::max(sol, cv::Scalar(0.0,0.0,0.0), sol);
     cv::min(sol, cv::Scalar(255.0,255.0,255.0), sol);
     sol.convertTo(sol, CV_8UC3);
@@ -114,8 +136,6 @@ public:
         
 		double min, max;
 		cv::minMaxLoc(input_image, &min, &max);
-		std::cerr<<"min="<<min<<" - max="<<max<<" - exposure="<<exposure<<" - lw="<<0.5*(max+min)*std::exp(-exposure)<<std::endl;
-
         	return tonemap(input_image, *expectedlum, *color, 0.18, 0.5*(max+min)*std::exp(-exposure), local_effect, color_effect);
 	}
 

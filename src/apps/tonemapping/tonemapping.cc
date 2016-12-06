@@ -8,7 +8,7 @@
  {
      QApplication app(argc, argv);
      
-     FilterTonemapping filter;
+     FilterTonemappingColor filter;
      WindowFilter window(filter);
      window.show();
 
