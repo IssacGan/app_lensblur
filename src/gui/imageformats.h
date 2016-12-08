@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include <imageHDR.h>
 #include <memory>
+#include <filters/filtertonemappingcolor.h>
 
 
 class Path 
@@ -68,11 +69,12 @@ inline QPixmap qpixmap(const cv::Mat& im) {
 	if (im.channels()>=3) {
 		cv::Mat image;
 		if (im.type()==CV_32FC3) { //If this is an HDR image we have to convert it to a 8 bit format
+			cv::Mat dummy(im.rows, im.cols, CV_32F); 
+			dummy = cv::Scalar(0.5);
 			double min, max;
 			cv::minMaxLoc(im, &min, &max);
-			cv::Scalar avg = cv::mean(im);
-			double mid = (avg.val[0] + avg.val[1] + avg.val[2])/3.0;
-			im.convertTo(image,CV_8UC3, 255.0/(0.5*(mid + max)));
+			image = FilterTonemappingColor::tonemap(im, dummy, dummy, -2.0, 3.0, std::log(min+(max-min)*0.1), std::log(max-(max-min)*0.1), 0.0, 0.0);
+			image.convertTo(image,CV_8UC3);
 			cv::cvtColor(image,image,CV_BGR2RGB);
 		} else {
 			cv::cvtColor(im, image, CV_BGR2RGB);

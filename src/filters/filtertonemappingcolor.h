@@ -4,7 +4,7 @@
 
 class FilterTonemappingColor : public Filter {
 
-static void color_correct_channel(cv::Mat& c, const cv::Mat& m, const cv::Mat& color_factor) 
+static void color_correct_channel(cv::Mat& c, const cv::Scalar& m, const cv::Mat& color_factor) 
 {
 	cv::Mat dc;
 	cv::multiply(c-m, color_factor, dc, 1, CV_32F);
@@ -24,9 +24,8 @@ static float luminance_curve(float luminance, float b, float c, float dl, float 
 	else                return 1.0;
 }
 
-//Trying this: https://www.cl.cam.ac.uk/~rkm38/pdfs/mantiuk08mgtmo.pdf
-//rate_min - percentage over the minimum luminance value to be discarded as black.
-//rate_max - percentage over the maximum luminance value to be burnt to white
+public:
+//Using this: https://www.cl.cam.ac.uk/~rkm38/pdfs/mantiuk08mgtmo.pdf
 static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, const cv::Mat& color_saturation, float brightness, float contrast, float dl, float dh, float factor_effect, float color_effect)
 {
     cv::Mat sol;
@@ -42,50 +41,34 @@ static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, const cv::Ma
     cv::Mat r =  R/luminance;
     cv::Mat g =  G/luminance;
     cv::Mat b =  B/luminance;
-    cv::Mat m =  (r + g + b)/3.0;
 
-    print_info("luminance", luminance);
+    cv::Mat color_factor;
+    cv::exp(color_effect*(color_saturation - cv::Scalar(0.5)), color_factor);
+
+    color_correct_channel(r, cv::Scalar(1.0), color_factor);
+    color_correct_channel(g, cv::Scalar(1.0), color_factor);
+    color_correct_channel(b, cv::Scalar(1.0), color_factor);
+
+    //These below are for luminance correction
     cv::Mat f;
-    cv::exp(-factor_effect*(factor - cv::Scalar(0.5,0.5,0.5)), f);
+    cv::exp(factor_effect*(factor - cv::Scalar(0.5,0.5,0.5)), f);
     cv::multiply(luminance, f, luminance, 1, CV_32F);
-    print_info("*factor", luminance);
     cv::Mat corrected_luminance(luminance.rows, luminance.cols, CV_32F);
     for(int i=0; i<luminance.rows; i++) 
     	for(int j=0; j<luminance.cols; j++) 
 		corrected_luminance.at<float>(i,j) = luminance_curve(luminance.at<float>(i,j), brightness, contrast, dl, dh);
-    print_info("corrected", corrected_luminance);
     
   
-    cv::Mat color_factor;
-    cv::exp(-color_effect*(color_saturation - cv::Scalar(0.5,0.5,0.5)), color_factor);
-
-    color_correct_channel(r, m, color_factor);
-    color_correct_channel(g, m, color_factor);
-    color_correct_channel(b, m, color_factor);
    
     cv::multiply(r, corrected_luminance, R, 255.0, CV_32F); 
     cv::multiply(g, corrected_luminance, G, 255.0, CV_32F); 
     cv::multiply(b, corrected_luminance, B, 255.0, CV_32F); 
     cv::merge(channels, sol);
     
-    print_info("Output", sol);
-    print_info("R", R); 
-    print_info("G", G); 
-    print_info("B", B);
-    print_info("r", r);
-    print_info("g", g);
-    print_info("b", b); 
-    print_info("luminance",luminance);
-
     cv::max(sol, cv::Scalar(0.0,0.0,0.0), sol);
     cv::min(sol, cv::Scalar(255.0,255.0,255.0), sol);
 
-
     sol.convertTo(sol, CV_8UC3);
-
- 
-    print_info("Final", sol);
-    std::cerr<<"-----"<<std::endl;
     return sol;
 }
 
@@ -103,8 +86,8 @@ public:
 	std::vector<FloatValue> floatValues() const override
        	{    
 		return std::vector<FloatValue>{{
-			FloatValue("Brightness",  -2.0f,2.0f),
-			FloatValue("Contrast",     0.0f,2.0f),
+			FloatValue("Brightness",   0.0f,-4.0f),
+			FloatValue("Contrast",     1.0f,5.0f),
 			FloatValue("Local effect", 0.0f,4.0f),
 			FloatValue("Color effect", 0.0f,5.0f)
 		}};    
@@ -116,8 +99,8 @@ public:
 			Stroke("Preserve",       0.50,0, 0.50,1),
 			Stroke("Darken",         0.05,0),
 			Stroke("Light up",       1.00,0),
-			Stroke("Desaturate",     0.05,1),
-			Stroke("Vivid",          1.00,1)
+			Stroke("Desaturate",     0.25,1),
+			Stroke("Vivid",          0.75,1)
 		}};		
 	}
 
