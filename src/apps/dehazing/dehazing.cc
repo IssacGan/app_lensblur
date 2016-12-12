@@ -14,6 +14,7 @@
      
      FilterDehazing filter;
      WindowFilter window(filter);
+     window.setFromCommandline(argc, argv);
      window.show();
 
      return app.exec();

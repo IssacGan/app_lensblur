@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
      
      FilterDepthOfField filter;
      WindowFilter window(filter);
+     window.setFromCommandline(argc, argv);
      window.show();
 
      return app.exec();

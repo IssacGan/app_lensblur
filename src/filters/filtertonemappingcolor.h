@@ -17,11 +17,11 @@ static float luminance_curve(float luminance, float b, float c, float dl, float 
 {
 	float ll = std::log(luminance);
 	float al = (c*dl - 1.0)/dl;
-	float ah = (c*ah - 1.0)/ah;
-	if (ll<(b-dl))      return 0.0;
-	else if (ll<b)      return 0.5*c*(ll - b)/(1 - al*(ll-b)) + 0.5;
-	else if (ll<(b+dh)) return 0.5*c*(ll - b)/(1 + ah*(ll-b)) + 0.5;
-	else                return 1.0;
+	float ah = (c*dh - 1.0)/dh;
+	if (ll<(b-dl))      return 0.0f;
+	else if (ll<b)      return 0.5f*c*(ll - b)/(1.0f - al*(ll-b)) + 0.5f;
+	else if (ll<(b+dh)) return 0.5f*c*(ll - b)/(1.0f + ah*(ll-b)) + 0.5f;
+	else                return 1.0f;
 }
 
 public:

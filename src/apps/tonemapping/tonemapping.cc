@@ -3,13 +3,15 @@
 #include <gui/windowfilter.h>
 #include <filters/filtertonemapping.h>
 #include <filters/filtertonemappingcolor.h>
+#include <filters/filtertonemappingmantiuk.h>
 
  int main(int argc, char *argv[])
  {
      QApplication app(argc, argv);
      
-     FilterTonemappingColor filter;
+     FilterTonemappingMantiuk filter;
      WindowFilter window(filter);
+     window.setFromCommandline(argc,argv);
      window.show();
 
      return app.exec();

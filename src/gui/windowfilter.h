@@ -11,6 +11,7 @@
  #include <QDir>
  #include <QFileDialog>
  #include <QThread>
+ #include <strings.h>
 
 #include "widgetfilter.h"
 
@@ -151,6 +152,19 @@ private:
 
 public:
      int addBrush(const char* name, float value, int channel=0) { return widget->addBrush(name, value, channel); }
+
+     void setFromCommandline(int argc, char** argv) 
+     {
+	     for (int i = 1; i<(argc-1); ++i)
+	     {
+	          if (strcmp("-load",argv[i])==0) {
+		       backThread->setFile(QString(argv[++i]));
+		       backThread->setMode(0);
+		       backThread->start();
+		  }
+	     }
+
+     }
 
      WindowFilter(const Filter& f) 
      {	    
