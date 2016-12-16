@@ -233,7 +233,7 @@ public:
 	buttonIdFiltered = multiImageViewer->add("Filtered",filtered_image);
 
 	for (int i=0;i<propagated_channels.size();++i) {
-		multiImageViewer->add(filter.propagatedValues()[i].c_str(),propagated_channels[i]);
+		multiImageViewer->add(filter.propagatedValues()[i].name().c_str(),propagated_channels[i]);
 	}
 
         //conectar señales
@@ -294,12 +294,12 @@ public:
 //            imageToEdit->set(input_image);
 //            imageMouseBrush->setImage(input_image);
 //
-
-	    for (DenseLabeling*& d : labels) { 
-		    if (d) delete d;
-		    d = new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
-	            d->addEquations_BinariesBoundariesPerPixelMean();
-		    d->addEquation_Unary(0,0,0.5f);
+	
+	    for (int i = 0; i < labels.size(); ++i) { 
+		    if (labels[i]) delete labels[i];
+		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
+	            labels[i]->addEquations_BinariesBoundariesPerPixelMean();
+		    labels[i]->addEquation_Unary(0,0,filter.propagatedValues()[i].defaultValue());
 	    }
 	    solveAll();
 	    *filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());

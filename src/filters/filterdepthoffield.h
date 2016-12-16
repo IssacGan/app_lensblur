@@ -115,10 +115,10 @@ static cv::Mat blur_image_focal_distance(const cv::Mat& image, const cv::Mat& de
 
 
 public:
-	std::vector<std::string> propagatedValues() const override
+	std::vector<PropagatedValue> propagatedValues() const override
        	{    
-		return std::vector<std::string>{{
-			std::string("Depth")
+		return std::vector<PropagatedValue>{{
+			PropagatedValue("Depth")
 		}};    
 	
 	}

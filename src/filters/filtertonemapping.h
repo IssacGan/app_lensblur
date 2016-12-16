@@ -44,10 +44,10 @@ static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& factor, double a, do
 
 
 public:
-	std::vector<std::string> propagatedValues() const override
+	std::vector<PropagatedValue> propagatedValues() const override
        	{    
-		return std::vector<std::string>{{
-			std::string("Local exposure")
+		return std::vector<PropagatedValue>{{
+			PropagatedValue("Local exposure")
 		}};    
 	
 	}

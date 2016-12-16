@@ -52,11 +52,11 @@ static cv::Mat tonemap(const cv::Mat& image, const cv::Mat& brightness, const cv
 
 
 public:
-	std::vector<std::string> propagatedValues() const override
+	std::vector<PropagatedValue> propagatedValues() const override
        	{    
-		return std::vector<std::string>{{
-			std::string("Local brightness"),
-			std::string("Local contrast")
+		return std::vector<PropagatedValue>{{
+			PropagatedValue("Local brightness"),
+			PropagatedValue("Local contrast")
 		}};    
 	
 	}

@@ -41,6 +41,18 @@ protected:
 	}
 
 public:
+	class PropagatedValue {
+		std::string _name;
+		float _default_value;
+	public:	
+		PropagatedValue(const std::string& name = std::string(), float default_value = 0.5f) :
+			_name(name), _default_value(default_value) { }
+		PropagatedValue(const char* name, float default_value = 0.5f) :
+			PropagatedValue(std::string(name), default_value) { }
+		const std::string& name() const { return _name; }
+		float defaultValue() const { return _default_value; }
+	};
+
 	class FloatValue {
 		std::string _name;
 		float _min, _max;
@@ -79,8 +91,8 @@ public:
 		const std::list<std::tuple<float, int>>& values() const { return _values; }
 	};
 
-	virtual std::vector<std::string> propagatedValues() const
-       	{    return std::vector<std::string>(0);    }
+	virtual std::vector<PropagatedValue> propagatedValues() const
+       	{    return std::vector<PropagatedValue>(0);    }
 	virtual std::vector<FloatValue> floatValues() const
        	{    return std::vector<FloatValue>(0);    }
 	virtual std::vector<Stroke> strokes() const
