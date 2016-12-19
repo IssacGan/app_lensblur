@@ -114,7 +114,7 @@ private:
             	    this->setCursor(Qt::PointingHandCursor); //Maybe have a look at the cursors somewhen
 		    activeBrush=brushes[id];
 		    if (activeBrush->shouldDrawStroke())
-	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*id)%360, 255, 255));
+	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*(id+1))%360, 255, 255));
 		    else
 			    imageMouseBrush->unsetBrush();
 	    }
@@ -360,19 +360,48 @@ private:
     }
 
     
-    void processImage(bool save=false, string dir = "")
+    void processImage(bool save=false, string dir = ".")
     {
-	std::stringstream sstr;
-    	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
-	solveAll();
-	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
-	sstr<<"Propagation: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
-    	start = std::chrono::system_clock::now();
-	*filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
-	elapsed_seconds = std::chrono::system_clock::now() - start;
-	sstr<<"        Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
-	setInfo(sstr.str().c_str());
-	multiImageViewer->setButton(buttonIdFiltered);
+        std::stringstream sstr;
+        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        solveAll();
+        std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+        sstr<<"Propagation: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
+        start = std::chrono::system_clock::now();
+        *filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
+        elapsed_seconds = std::chrono::system_clock::now() - start;
+        sstr<<"        Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
+        setInfo(sstr.str().c_str());
+        multiImageViewer->setButton(buttonIdFiltered);
+        
+        if (save)
+        {
+            static int n=0;
+            
+            for (DenseLabeling* d : labels) {
+                Mat user = d->getImageLabelsInput() * 255.0;
+                user.convertTo(user, CV_8UC1);
+                string name = dir + "/user_input_" + to_string(n) + ".png";
+                
+                imwrite(name,user);
+                
+                for (int i=0;i<propagated_channels.size();++i)
+                {
+                    name = dir + "/propagated" + to_string(i) +"_" + to_string(n) +".png";
+                    Mat sol = *propagated_channels[i] * 255.0;
+                    sol.convertTo(sol, CV_8UC1);
+                    imwrite(name,sol);
+                }
+                
+                name = dir + "/filtered" + to_string(n) + ".png";
+                imwrite(name,*filtered_image);
+                
+                name = dir + "/user_strokes" + to_string(n) + ".png";
+                strokes_pixmap->save(QString::fromStdString(name));
+                
+                n++;
+            }
+        }
     }
 };
 

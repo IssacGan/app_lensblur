@@ -134,12 +134,20 @@ public:
 
 	std::vector<Stroke> strokes() const override
        	{    
-		return std::vector<Stroke>{{
+		/*return std::vector<Stroke>{{
 			Stroke("Furthest", 0.01),
+            Stroke("Far 2",    0.15),
 			Stroke("Far",      0.34),
 			Stroke("Close",    0.67),
 			Stroke("Near",     1.00)
-		}};		
+		}};		*/
+            return std::vector<Stroke>{{
+                Stroke("Furthest", 0.01),
+                Stroke("Far 2",    0.25),
+                Stroke("Far",      0.44),
+                Stroke("Close",    0.77),
+                Stroke("Near",     1.00)
+            }};
 	}
 
 

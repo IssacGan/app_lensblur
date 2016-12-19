@@ -44,7 +44,7 @@ public:
 
     void setMode(int i)
     {
-	mode = i;
+        mode = i;
     }
 
 protected:
