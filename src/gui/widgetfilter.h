@@ -31,7 +31,7 @@ class BrushEditChannel : public Brush
 	std::list<std::tuple<float, int>> values;
 public:
 	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
-			std::vector<bool>& _edited, const std::list<std::tuple<float, int>> _values) :
+			std::vector<bool>& _edited, const std::list<std::tuple<float, int>>& _values) :
 	       labels(_labels), edited(_edited), values(_values) { }
 	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
 			std::vector<bool>& _edited, float _value, int _channel) : 
@@ -59,42 +59,29 @@ public:
 	bool shouldDrawStroke() const override { return true; }
 };
 
-/*
 class BrushSetEqualChannel : public Brush
 {
 	const std::vector<DenseLabeling*>& labels;
-	std::vector<bool>& edited;
 	std::list<int> channels;
+	int x_prev, y_prev;
 public:
-	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
-			std::vector<bool>& _edited, const std::list<std::tuple<float, int>> _values) :
-	       labels(_labels), edited(_edited), values(_values) { }
-	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
-			std::vector<bool>& _edited, float _value, int _channel) : 
-		BrushEditChannel(_labels, _edited, std::list<std::tuple<float,int>>{{std::make_tuple(_value, _channel)}}) { }
-
+	BrushSetEqualChannel(const std::vector<DenseLabeling*>& _labels, 
+			const std::list<int> _channels) :
+	       labels(_labels), channels(_channels), x_prev(-1), y_prev(-1) { }
+	
 	void onClicked(int x, int y) override {
-		for (auto t : values) {
-			float value; int channel;
-			std::tie(value, channel) = t;
-	    		if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
-	    			edited[channel] = true;
-				labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
-	    		}
-		}
+		x_prev = x; y_prev = y;
 	}
 
 	void onMoved(int x, int y) override { //This event also happens when clicking.
-		for (auto t : values) {
-			float value; int channel;
-			std::tie(value, channel) = t;
-	    		labels[channel]->addEquation_Unary(x,y,value);
+		for (int channel : channels) {
+			labels[channel]->addEquation_Equal(x, y, x_prev, y_prev); //Does not add it if any of them are -1 or if both are equal.
 		}
+		x_prev = x; y_prev = y;
 	}
 
 	bool shouldDrawStroke() const override { return true; }
 };
-*/
 
 
 class BrushPickValue : public Brush
@@ -243,7 +230,7 @@ public:
         QVBoxLayout *image = new QVBoxLayout;
         image->addWidget(multiImageViewer);
        
-        //BUTTONS FOR STORKES	
+        //BUTTONS FOR STROKES	
 	for (auto stroke : filter.strokes()) {
 		QPushButton* button = new QPushButton(QString(stroke.name().c_str()));
 	        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -257,6 +244,28 @@ public:
 		}
 		button_id++;
 	}
+	//SEPARATOR
+	QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        buttonLayout->addWidget(line);
+	//BUTTONS FOR EQUAL
+	std::list<int> list_of_channels;
+	for (int c = 0; c<filter.propagatedValues().size(); ++c) list_of_channels.push_back(c);
+	for (int b = 0; b<2; ++b) {
+		QPushButton* button = new QPushButton(QString(("Equal "+std::to_string(b)).c_str()));
+	        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		button->setCheckable(true);
+		buttonLayout->addWidget(button);
+		buttonOptions->addButton(button, button_id);
+		brushes.push_back(std::make_shared<BrushSetEqualChannel>(labels, list_of_channels));
+		if (button_id == 0) {
+			button->setChecked(true);
+			chooseButton(0);
+		}
+		button_id++;
+	}
+
         
         //add label de info
         info->setFrameStyle(QFrame::Panel | QFrame::Sunken);
