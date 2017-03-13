@@ -58,9 +58,6 @@ public:
         Optimization::LeastSquaresLinearSystem<double> equalN = unary; equalN.normalize();
 
         
-        double w_u = this->w_unary;
-        float w_color=this->w_color;
-        
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
         
         B.normalize();
@@ -82,6 +79,8 @@ public:
         
         //pinta imagen resultado
         // double min=10000, max=0;
+	//
+	// EXTREMELLY SLOW OH MY GOD
         for (unsigned int id=0; id < maxID +1 ; id++) {
             
             Scalar color(x(id,0));
@@ -93,12 +92,13 @@ public:
 //        printf("\t * TIME  build solution %f seconds \n ",t);
         
         return final.clone();
-        
     }
     
     //UNARY EQUATIONS
     void clearUnaries() { unary.clear(); }
-    
+     //EQUAL EQUATIONS
+    void clearEqual() { equal.clear(); }
+     
     void addEquations_Unaries(string nameLabels)
     {
 //        clock_t start = clock();
