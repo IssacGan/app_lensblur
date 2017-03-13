@@ -34,7 +34,7 @@ public:
 			std::vector<bool>& _edited, const std::list<std::tuple<float, int>> _values) :
 	       labels(_labels), edited(_edited), values(_values) { }
 	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
-			std::vector<bool>& _edited, float _value, float _channel) : 
+			std::vector<bool>& _edited, float _value, int _channel) : 
 		BrushEditChannel(_labels, _edited, std::list<std::tuple<float,int>>{{std::make_tuple(_value, _channel)}}) { }
 
 	void onClicked(int x, int y) override {
@@ -58,6 +58,44 @@ public:
 
 	bool shouldDrawStroke() const override { return true; }
 };
+
+/*
+class BrushSetEqualChannel : public Brush
+{
+	const std::vector<DenseLabeling*>& labels;
+	std::vector<bool>& edited;
+	std::list<int> channels;
+public:
+	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
+			std::vector<bool>& _edited, const std::list<std::tuple<float, int>> _values) :
+	       labels(_labels), edited(_edited), values(_values) { }
+	BrushEditChannel(const std::vector<DenseLabeling*>& _labels, 
+			std::vector<bool>& _edited, float _value, int _channel) : 
+		BrushEditChannel(_labels, _edited, std::list<std::tuple<float,int>>{{std::make_tuple(_value, _channel)}}) { }
+
+	void onClicked(int x, int y) override {
+		for (auto t : values) {
+			float value; int channel;
+			std::tie(value, channel) = t;
+	    		if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
+	    			edited[channel] = true;
+				labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
+	    		}
+		}
+	}
+
+	void onMoved(int x, int y) override { //This event also happens when clicking.
+		for (auto t : values) {
+			float value; int channel;
+			std::tie(value, channel) = t;
+	    		labels[channel]->addEquation_Unary(x,y,value);
+		}
+	}
+
+	bool shouldDrawStroke() const override { return true; }
+};
+*/
+
 
 class BrushPickValue : public Brush
 {

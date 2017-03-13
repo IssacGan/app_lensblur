@@ -23,11 +23,13 @@ class DenseLabeling : public SuperPixels
     int numUnknows;
     Optimization::LeastSquaresLinearSystem<double> equations;
     Optimization::LeastSquaresLinearSystem<double> unary;
+    Optimization::LeastSquaresLinearSystem<double> equal;
     Optimization::LeastSquaresLinearSystem<double> binary;
     Optimization::LeastSquaresLinearSystem<double> binaryCOLOR;
     
 
     double w_unary;
+    double w_equal;
     double w_color;
     
     int MAX_BINARIAS=1000000;
@@ -38,15 +40,13 @@ class DenseLabeling : public SuperPixels
 public:
     
     
-    DenseLabeling(string path, double w_u=0.3, double w_c=0.99, double diff_lab=15.0) : SuperPixels(path)
-    {
-        this->w_unary = w_u;
-        this->w_color = w_c;
-        this->_MAX_DIFF_LAB = diff_lab;
-        
+    DenseLabeling(string path, double w_u=0.3, double w_e=0.5, double w_c=0.99, double diff_lab=15.0) : SuperPixels(path),
+       	w_unary(w_u), w_equal(w_e), w_color(w_c), _MAX_DIFF_LAB(diff_lab)
+    {       
         numUnknows = (this->maxID+1);
         
         this->unary = Optimization::LeastSquaresLinearSystem<double>((maxID+1));
+        this->equal = Optimization::LeastSquaresLinearSystem<double>((maxID+1));
         
     }
     
@@ -54,10 +54,9 @@ public:
     {
  //       clock_t start = clock();
         
-        Optimization::LeastSquaresLinearSystem<double> unaryN;
-        
-        unaryN = unary;
-        unaryN.normalize();
+        Optimization::LeastSquaresLinearSystem<double> unaryN = unary; unaryN.normalize();
+        Optimization::LeastSquaresLinearSystem<double> equalN = unary; equalN.normalize();
+
         
         double w_u = this->w_unary;
         float w_color=this->w_color;
@@ -65,11 +64,11 @@ public:
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
         
         B.normalize();
-        equations = (unaryN * (double)w_u )+ (B * (double)(1.0 - w_u ));
+        equations = (unaryN * w_unary )+ (B * (1.0 - w_unary )) + equalN*w_equal;
         
         
         MatrixFX x(maxID+1);
-        equations.normalize();
+//        equations.normalize();
         
         x = equations.solve();
         
@@ -138,6 +137,22 @@ public:
         
 //        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
 //        printf("\t * TIME  Unaries (%d) %f seconds \n ",num_u,t);
+    }
+
+    void addEquation_Equal(int x1, int y1, int x2, int y2) 
+    {
+        if (x1 < 0 || x1 > this->_image.cols || y1 < 0 || y1 >this->_image.rows)
+            return;
+        if (x2 < 0 || x2 > this->_image.cols || y2 < 0 || y2 >this->_image.rows)
+            return;
+
+	int id1=getIdFromPixel(x1, y1);
+	int id2=getIdFromPixel(x2, y2);
+	Optimization::SparseEquation<float> eq;
+        eq.a[id1]=1.0;
+        eq.a[id2]=-1.0;
+        eq.b=0.0;
+        unary.add_equation(eq);
     }
     
     void addEquation_Unary(int x,int y,float li, bool saveInput=false)
