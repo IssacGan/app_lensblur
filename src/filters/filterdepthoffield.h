@@ -102,7 +102,7 @@ static cv::Mat blur_image_focal_distance(const cv::Mat& image, const cv::Mat& de
 
 //    start = std::chrono::system_clock::now();
     auto blurred = create_blurred(image, aperture*255.0/focal_length, nbins);
-    
+    imshow("blurred",blurred);
     cv::Mat distance_to_focus = cv::abs(depth - focal_distance);
     double min, max;
     cv::minMaxLoc(distance_to_focus, &min, &max);
@@ -110,6 +110,7 @@ static cv::Mat blur_image_focal_distance(const cv::Mat& image, const cv::Mat& de
 
     //std::cerr<<"Tiempo blur : "<<std::chrono::duration<double>(std::chrono::system_clock::now() - start).count()<<std::endl;
     return sol;
+    
 }
 
 
@@ -134,20 +135,20 @@ public:
 
 	std::vector<Stroke> strokes() const override
        	{    
-		/*return std::vector<Stroke>{{
+		return std::vector<Stroke>{{
 			Stroke("Furthest", 0.01),
-            Stroke("Far 2",    0.15),
+            //Stroke("Far 2",    0.15),
 			Stroke("Far",      0.34),
 			Stroke("Close",    0.67),
 			Stroke("Near",     1.00)
-		}};		*/
-            return std::vector<Stroke>{{
+		}};
+            /*return std::vector<Stroke>{{
                 Stroke("Furthest", 0.01),
                 Stroke("Far 2",    0.25),
                 Stroke("Far",      0.44),
                 Stroke("Close",    0.77),
                 Stroke("Near",     1.00)
-            }};
+            }};*/
 	}
 
 
@@ -160,6 +161,19 @@ public:
 		auto  depth          = propagated_values[0];
 
 		float focal_length = focal_distance + 20;
+        
+        //NEW: hacer blur
+        Mat sol,solB,solN,newDepth;
+        Mat bilateralDepth = *depth * 255.0;
+        bilateralDepth.convertTo(bilateralDepth, CV_8UC1);
+        bilateralFilter(bilateralDepth, newDepth,15, 100,100 , BORDER_DEFAULT);
+        imshow("newDepth",newDepth);//*/
+        newDepth.convertTo(newDepth, CV_32F, 1.0f/255.0f);
+        solB = blur_image_depth(input_image, newDepth, 6, focal_distance, focal_length, aperture, true);
+        solN=blur_image_depth(input_image, *depth, 6, focal_distance, focal_length, aperture, true);
+        hconcat(solN,solB,sol);
+        imshow("out",sol);//*/
+        
 
 		return blur_image_depth(input_image, *depth, 6, focal_distance, focal_length, aperture, true);	
 	}

@@ -48,6 +48,7 @@ public:
         this->unary = Optimization::LeastSquaresLinearSystem<double>((maxID+1));
         this->equal = Optimization::LeastSquaresLinearSystem<double>((maxID+1));
         
+        
     }
     
     Mat solve()
@@ -58,14 +59,22 @@ public:
         Optimization::LeastSquaresLinearSystem<double> equalN = unary; equalN.normalize();
 
         
+<<<<<<< Updated upstream
+=======
+        //double w_u = this->w_unary;
+        float w_color=this->w_color;
+        
+        
+>>>>>>> Stashed changes
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
         
         B.normalize();
-        equations = (unaryN * w_unary )+ (B * (1.0 - w_unary )) + equalN*w_equal;
+
+        equations = (unaryN * w_unary )+ (B * (1.0 - w_unary - w_equal )) + (equalN * w_equal);
         
         
         MatrixFX x(maxID+1);
-//        equations.normalize();
+        //equations.normalize();
         
         x = equations.solve();
         

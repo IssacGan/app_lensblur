@@ -10,6 +10,11 @@
 #include "imagemousebrush.h"
 #include "multiimageviewer.h"
 #include "../filters/filter.h"
+#include <opencv2/contrib/contrib.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "denseLabeling.cpp"
 #include "imageHDR.h"
@@ -139,7 +144,7 @@ private:
             	    this->setCursor(Qt::PointingHandCursor); //Maybe have a look at the cursors somewhen
 		    activeBrush=brushes[id];
 		    if (activeBrush->shouldDrawStroke())
-	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*(id+1))%360, 255, 255));
+	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*(id))%360, 255, 255));
 		    else
 			    imageMouseBrush->unsetBrush();
 	    }
@@ -344,8 +349,8 @@ public:
 	
 	    for (int i = 0; i < labels.size(); ++i) { 
 		    if (labels[i]) delete labels[i];
-		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.99,10.0);
-	            labels[i]->addEquations_BinariesBoundariesPerPixelMean();
+		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.5,0.99,10.0);
+            labels[i]->addEquations_BinariesBoundariesPerPixelMean();
 		    labels[i]->addEquation_Unary(0,0,filter.propagatedValues()[i].defaultValue());
 	    }
 	    solveAll();
@@ -415,11 +420,29 @@ private:
         std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
         sstr<<"Propagation: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
         start = std::chrono::system_clock::now();
-        *filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());
+        *filtered_image = filter.apply(*input_image, propagated_channels, filterParameters());     
+        
         elapsed_seconds = std::chrono::system_clock::now() - start;
         sstr<<"        Image processing: "<<std::setprecision(6)<<std::setw(8)<<std::fixed<<elapsed_seconds.count()<<" seconds";
         setInfo(sstr.str().c_str());
         multiImageViewer->setButton(buttonIdFiltered);
+        
+        //remove
+       /* Mat sol0 = *propagated_channels[0] * 255.0;
+        sol0.convertTo(sol0, CV_8UC1);
+        
+        Mat sol1 = *propagated_channels[1] * 255.0;
+        sol1.convertTo(sol1, CV_8UC1);
+        //applyColorMap(sol,sol,COLORMAP_JET);
+        Mat sol;
+        vconcat(sol0,sol1,sol);
+        Size s;
+        s.width = 558;
+        s.height = 330;
+        cv::resize(sol0,sol0,s);
+        imshow("0",sol0);
+         cv::resize(sol1,sol1,s);
+        imshow("1",sol1);*/
         
         if (save)
         {

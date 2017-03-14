@@ -75,11 +75,18 @@ public:
        	{    
 		return std::vector<Stroke>{{
 			Stroke("Preserve",       0.50,0, 0.50,1),
-			Stroke("Darken",         0.05,0),
+			Stroke("Darken",         0.10,0),
 			Stroke("Light up",       1.00,0),
 			Stroke("Reduce contrast",   0.05,1),
 			Stroke("Increase contrast", 1.00,1)
-		}};		
+		}};
+            /*return std::vector<Stroke>{{
+             Stroke("Preserve",       0.50,0, 0.50,1),
+             Stroke("Darken",         0.05,0),
+             Stroke("Light up",       1.00,0),
+             Stroke("Reduce contrast",   0.05,1),
+             Stroke("Increase contrast", 1.00,1)
+             }};	*/
 	}
 
 
@@ -111,6 +118,20 @@ public:
 //		std::cerr<<"B = "<<brightness<<" - C = "<<contrast<<" - DL = 2 - DH = 1"<<std::endl;
 //		for (float ll = logmin; ll<=logmax; ll+=0.05*(logmax-logmin))
 //			std::cerr<<std::exp(ll)<<" -> "<<luminance_curve(std::exp(ll),brightness, contrast, 2, 1)<<std::endl;
+        
+        //NEW: hacer blur
+        /*cv::Mat sol,solB,solN,newB,;
+        cv::Mat bilateralDepth = local_brightness * 255.0;
+        bilateralDepth.convertTo(bilateralDepth, CV_8UC1);
+        bilateralFilter(bilateralDepth, newB,15, 100,100 , cv::BORDER_DEFAULT);
+        imshow("newDepth",newB);
+        newB.convertTo(newB, CV_32F, 1.0f/255.0f);
+        solB = tonemap(input_image, b, c, 2, 1);
+        solN= tonemap(input_image, newB, c, 2, 1);
+        hconcat(solN,solB,sol);
+        imshow("out",sol);//*/
+        
+        
         	return tonemap(input_image, b, c, 2, 1);
 	}
 

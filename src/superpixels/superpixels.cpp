@@ -46,7 +46,7 @@ protected:
     
     // superpixels params
     int _TAM_SP = 20;
-    int _NUM_MAX_SP = 700;
+    int _NUM_MAX_SP = 1000;
     
     int NUMLABELS=256;
     
@@ -263,6 +263,8 @@ public:
         
         calculateBoundariesSuperpixels();
         initializeSuperpixels();
+        
+        imshow("superpixels",getImageSuperpixels());
         
         return;
     }//SuperPixels
