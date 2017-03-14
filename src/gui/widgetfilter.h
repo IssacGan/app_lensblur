@@ -349,7 +349,7 @@ public:
 	
 	    for (int i = 0; i < labels.size(); ++i) { 
 		    if (labels[i]) delete labels[i];
-		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.5,0.99,10.0);
+		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.3,0.99,10.0);
             labels[i]->addEquations_BinariesBoundariesPerPixelMean();
 		    labels[i]->addEquation_Unary(0,0,filter.propagatedValues()[i].defaultValue());
 	    }

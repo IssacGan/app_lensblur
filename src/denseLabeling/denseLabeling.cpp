@@ -56,16 +56,12 @@ public:
  //       clock_t start = clock();
         
         Optimization::LeastSquaresLinearSystem<double> unaryN = unary; unaryN.normalize();
-        Optimization::LeastSquaresLinearSystem<double> equalN = unary; equalN.normalize();
+        Optimization::LeastSquaresLinearSystem<double> equalN = equal; equalN.normalize();
 
-        
-<<<<<<< Updated upstream
-=======
+
         //double w_u = this->w_unary;
         float w_color=this->w_color;
-        
-        
->>>>>>> Stashed changes
+
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
         
         B.normalize();
@@ -155,13 +151,13 @@ public:
         if (x2 < 0 || x2 > this->_image.cols || y2 < 0 || y2 >this->_image.rows)
             return;
 
-	int id1=getIdFromPixel(x1, y1);
-	int id2=getIdFromPixel(x2, y2);
-	Optimization::SparseEquation<float> eq;
+        int id1=getIdFromPixel(x1, y1);
+        int id2=getIdFromPixel(x2, y2);
+        Optimization::SparseEquation<float> eq;
         eq.a[id1]=1.0;
         eq.a[id2]=-1.0;
         eq.b=0.0;
-        unary.add_equation(eq);
+        equal.add_equation(eq);
     }
     
     void addEquation_Unary(int x,int y,float li, bool saveInput=false)
