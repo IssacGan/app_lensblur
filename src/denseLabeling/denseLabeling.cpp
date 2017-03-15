@@ -40,7 +40,7 @@ class DenseLabeling : public SuperPixels
 public:
     
     
-    DenseLabeling(string path, double w_u=0.3, double w_e=0.5, double w_c=0.99, double diff_lab=15.0) : SuperPixels(path),
+    DenseLabeling(string path, double w_u=0.4, double w_e=0.3, double w_c=0.99, double diff_lab=15.0) : SuperPixels(path),
        	w_unary(w_u), w_equal(w_e), w_color(w_c), _MAX_DIFF_LAB(diff_lab)
     {       
         numUnknows = (this->maxID+1);
@@ -53,48 +53,63 @@ public:
     
     Mat solve()
     {
- //       clock_t start = clock();
-        
         Optimization::LeastSquaresLinearSystem<double> unaryN = unary; unaryN.normalize();
         Optimization::LeastSquaresLinearSystem<double> equalN = equal; equalN.normalize();
 
-
-        //double w_u = this->w_unary;
         float w_color=this->w_color;
 
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
         
         B.normalize();
 
-        equations = (unaryN * w_unary )+ (B * (1.0 - w_unary - w_equal )) + (equalN * w_equal);
-        
-        
+        equations = (unaryN * w_unary )+ (B * (1.0 - w_unary - w_equal )) + (equalN * w_equal);       
+    
         MatrixFX x(maxID+1);
-        //equations.normalize();
         
         x = equations.solve();
         
-//        float t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-//        printf("\t * TIME  solve system %f seconds \n ",t);
-        
-        
-//        start = clock();
-        
         Mat  final=Mat::ones(_labels.rows,_labels.cols,CV_32FC1);
-        
-        //pinta imagen resultado
-        // double min=10000, max=0;
-	//
-	// EXTREMELLY SLOW OH MY GOD
-        for (unsigned int id=0; id < maxID +1 ; id++) {
-            
-            Scalar color(x(id,0));
-            final.setTo(color, getMask(id));
-            _labels.setTo(color,getMask(id));
+        //start = clock();
+        for (int i=0; i< final.cols ; i++)
+        {
+            for (int j=0; j< final.rows ; j++)
+            {
+                int id=getIdFromPixel(i, j);
+                final.at<float>(j,i)=(float)x(id,0);
+                _labels.at<float>(j,i)=(float)x(id,0);
+                
+            }
         }
         
-//        t = ((double)(clock() - start) /CLOCKS_PER_SEC);
-//        printf("\t * TIME  build solution %f seconds \n ",t);
+        //////
+        //
+        
+        /*Optimization::LeastSquaresLinearSystem<double> equations2;
+        equations2 = (unaryN * w_unary )+ (B * (1.0 - w_unary));
+        
+        MatrixFX x2(maxID+1);
+        
+        x2 = equations2.solve();
+        
+        Mat  final2=Mat::ones(_labels.rows,_labels.cols,CV_32FC1);
+        //start = clock();
+        for (int i=0; i< final.cols ; i++)
+        {
+            for (int j=0; j< final.rows ; j++)
+            {
+                int id=getIdFromPixel(i, j);
+                final2.at<float>(j,i)=(float)x2(id,0);
+                _labels.at<float>(j,i)=(float)x2(id,0);
+                
+            }
+        }
+        
+        Mat out;
+        hconcat(final,final2,out);
+        imshow("cmp",out);//*/
+        ////////
+        
+        //printf("\t * TIME2 %f seconds \n ",((double)(clock() - start) /CLOCKS_PER_SEC));
         
         return final.clone();
     }
@@ -146,6 +161,7 @@ public:
 
     void addEquation_Equal(int x1, int y1, int x2, int y2) 
     {
+        //Does not add it if any of them are -1 or if both are equal.
         if (x1 < 0 || x1 > this->_image.cols || y1 < 0 || y1 >this->_image.rows)
             return;
         if (x2 < 0 || x2 > this->_image.cols || y2 < 0 || y2 >this->_image.rows)
@@ -153,9 +169,15 @@ public:
 
         int id1=getIdFromPixel(x1, y1);
         int id2=getIdFromPixel(x2, y2);
+        
+        printf("**** ADD EQUAL ID1 %d (%d,%d) ID2 %d (%d,%d)\n",id1,x1,y1,id2,x2,y2);
+        
+        if (id1 == id2)
+            return;
+        
         Optimization::SparseEquation<float> eq;
-        eq.a[id1]=1.0;
-        eq.a[id2]=-1.0;
+        eq.a[id1]= 1.0;
+        eq.a[id2]= -1.0;
         eq.b=0.0;
         equal.add_equation(eq);
     }
@@ -163,7 +185,7 @@ public:
     void addEquation_Unary(int x,int y,float li, bool saveInput=false)
     {
         
-        clock_t start = clock();
+        //clock_t start = clock();
         
         if (x < 0 || x > this->_image.cols || y < 0 || y >this->_image.rows)
             return;

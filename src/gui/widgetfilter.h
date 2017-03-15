@@ -46,10 +46,12 @@ public:
 		for (auto t : values) {
 			float value; int channel;
 			std::tie(value, channel) = t;
-	    		if (!edited[channel]) { //We update the edited thing only on clicked (a bit extra efficiency)
-	    			edited[channel] = true;
-				labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
-	    		}
+            if (!edited[channel])
+            { //We update the edited thing only on clicked (a bit extra efficiency)
+                edited[channel] = true;
+                labels[channel]->clearEqual();
+                labels[channel]->clearUnaries(); //We remove the initial equation that sets up the entire thing.
+            }
 		}
 	}
 
@@ -75,14 +77,22 @@ public:
 	       labels(_labels), channels(_channels), x_prev(-1), y_prev(-1) { }
 	
 	void onClicked(int x, int y) override {
-		x_prev = x; y_prev = y;
+        //printf("\n=====\n");
+        //printf("onClicked BrushSetEqualChannel (%d,%d) ID %d\n",x_prev,y_prev,labels[0]->getIdFromPixel(x_prev,y_prev));
+        
+        //printf("onClicked BrushSetEqualChannel (%d,%d) ID %d\n",x,y,labels[0]->getIdFromPixel(x, y));
+        for (int channel : channels) {
+         labels[channel]->addEquation_Equal(x, y, x_prev, y_prev); //Does not add it if any of them are -1 or if both are equal.
+         }//*/
+        x_prev = x; y_prev = y;
+        
 	}
 
 	void onMoved(int x, int y) override { //This event also happens when clicking.
-		for (int channel : channels) {
+		/*for (int channel : channels) {
 			labels[channel]->addEquation_Equal(x, y, x_prev, y_prev); //Does not add it if any of them are -1 or if both are equal.
-		}
-		x_prev = x; y_prev = y;
+		}//*/
+		//x_prev = x; y_prev = y;
 	}
 
 	bool shouldDrawStroke() const override { return true; }
@@ -120,15 +130,15 @@ private:
 	    std::vector<std::shared_ptr<cv::Mat>> propagated_channels;
 
 
-    	    ImageMouseBrush *imageMouseBrush;
-            MultiImageViewer *multiImageViewer;
-    	    QButtonGroup *buttonOptions;
-	    QVBoxLayout  *buttonLayout;
-            QLabel* info;
+        ImageMouseBrush *imageMouseBrush;
+        MultiImageViewer *multiImageViewer;
+    	QButtonGroup *buttonOptions;
+        QVBoxLayout  *buttonLayout;
+        QLabel* info;
 
-    	    int buttonIdStrokes, buttonIdInput, buttonIdFiltered;
+    	int buttonIdStrokes, buttonIdInput, buttonIdFiltered;
     
-            //Datos
+        //Datos
 	    std::vector<DenseLabeling*> labels;
    
    	    int button_id; 
@@ -141,10 +151,19 @@ private:
     void chooseButton(int id)
     {
 	    if ((id>=0) && (id<brushes.size())) {
-            	    this->setCursor(Qt::PointingHandCursor); //Maybe have a look at the cursors somewhen
+            cout << "button id: " << id << endl;
+            this->setCursor(Qt::PointingHandCursor); //Maybe have a look at the cursors somewhen
 		    activeBrush=brushes[id];
 		    if (activeBrush->shouldDrawStroke())
-	    		    imageMouseBrush->setColorBrush(QColor::fromHsv((100*(id))%360, 255, 255));
+            {
+                if (id == 5)
+                    imageMouseBrush->setColorBrush(QColor::fromRgb(255, 0, 0));
+                else if (id == 6)
+                    imageMouseBrush->setColorBrush(QColor::fromRgb(0, 0, 255));
+                else
+                    imageMouseBrush->setColorBrush(QColor::fromHsv((100*(id))%360, 255, 255));
+
+            }
 		    else
 			    imageMouseBrush->unsetBrush();
 	    }
@@ -152,7 +171,7 @@ private:
 
     void updateSlider(int size)
     {
-	if ((input_image) && (!input_image->empty())) processImage();
+        if ((input_image) && (!input_image->empty())) processImage();
     }
 
     std::vector<bool> edited;
@@ -349,7 +368,7 @@ public:
 	
 	    for (int i = 0; i < labels.size(); ++i) { 
 		    if (labels[i]) delete labels[i];
-		    labels[i] = new DenseLabeling(filename.toStdString(),0.3,0.3,0.99,10.0);
+            labels[i] = new DenseLabeling(filename.toStdString());//,0.3,0.3,0.99,10.0);
             labels[i]->addEquations_BinariesBoundariesPerPixelMean();
 		    labels[i]->addEquation_Unary(0,0,filter.propagatedValues()[i].defaultValue());
 	    }
