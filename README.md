@@ -15,7 +15,7 @@ You can clone the repository and compile everything (git + cmake + g++):
 ```
 git clone https://github.com/anacambra/app_lensblur.git
 cd app_lensblur
-git branch -u origin/TVCG TVCG
+git branch -u origin/TVCJ TVCJ
 git checkout TVCG
 mkdir build
 cd build
@@ -39,10 +39,4 @@ Using the `build` is recommended in order to avoid poluting the folder with the 
 Notice that `cmake` has many generators, it is supposed to help cross-plattform compilation. Some of them generate different kinds of makefiles, while some others generate specific IDE projects (such as Visual Studio or XCode projects). Find more information [here](https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html).
 
 The parameter `-DCMAKE_BUILD_TYPE=Release` is required for optimization purposes on command-line generators, and can be replaced by `-DCMAKE_BUILD_TYPE=Debug` for debug purposes. IDE generators will include both build types into the corresponding projects. 
-
-There are two lines that are necesary because this is a branch, and not the master of the repository, and might eventually dissappear:
-```
-git branch -u origin/filters filters
-git checkout filters 
-``` 
 
