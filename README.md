@@ -15,8 +15,8 @@ You can clone the repository and compile everything (git + cmake + g++):
 ```
 git clone https://github.com/anacambra/app_lensblur.git
 cd app_lensblur
-git branch -u origin/filters filters
-git checkout filters 
+git branch -u origin/TVCG TVCG
+git checkout TVCG
 mkdir build
 cd build
 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
