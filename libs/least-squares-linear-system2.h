@@ -65,8 +65,10 @@ public:
 	void normalize()
 	{
 		real max = std::max({fabs(A.maxCoeff()),fabs(B.maxCoeff()),fabs(A.minCoeff()),fabs(B.minCoeff())});
-		A*=(real(1)/max);
-		B*=(real(1)/max);
+		if (max > 0) {
+			A*=(real(1)/max);
+			B*=(real(1)/max);
+		}
 	}
 
 	void operator*=(const real& v)
@@ -82,7 +84,13 @@ public:
 	{       LeastSquaresLinearSystem s = (*this); s+=that; return s;   	}
 
 	Eigen::Matrix<real,size,1> solve() const
-	{	return A.ldlt().solve(B);       }
+	{
+		return A.ldlt().solve(B);  
+   	}
+
+	void show() const {
+		std::cout<<A<<std::endl;
+	}
     
     /*void getEigenValuesA()
     {

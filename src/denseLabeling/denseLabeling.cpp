@@ -59,15 +59,15 @@ public:
         float w_color=this->w_color;
 
         Optimization::LeastSquaresLinearSystem<double> B = (binary*(double)(1.0 - w_color)) + (binaryCOLOR*(double)(w_color));
-        
+       
         B.normalize();
 
         equations = (unaryN * w_unary )+ (B * (1.0 - w_unary - w_equal )) + (equalN * w_equal);       
-    
+
         MatrixFX x(maxID+1);
         
         x = equations.solve();
-        
+
         Mat  final=Mat::ones(_labels.rows,_labels.cols,CV_32FC1);
         //start = clock();
         for (int i=0; i< final.cols ; i++)
